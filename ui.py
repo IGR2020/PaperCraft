@@ -1,15 +1,15 @@
 import pygame
 from objects import Item
 from pygame_tools import blit_text
-from constants import inv_slot_img
+from constants import inv_slot_img, block_size
 
 
 # finds available or matching slots for an item
-def find_slot(item, inventory, max_stack_count=64):
+def find_slot(item_name, inventory, max_stack_count=64):
     for i, button in enumerate(inventory):
         if button.item is None:
             return i
-        elif button.item < max_stack_count and button.item.name == item.name:
+        elif button.item.count < max_stack_count and button.item.name == item_name:
             return i
     else:
         return None
@@ -31,7 +31,7 @@ def maintain_slots(inventory, max_stack_size=64):
         overflow = button.item.count - max_stack_size
         button.item.count - overflow
         # finding available position and depositing item if found
-        index = find_slot(button.item, inventory, max_stack_size)
+        index = find_slot(button.item.name, inventory, max_stack_size)
         if index is None:
             return
         if inventory[index].item is not None:
@@ -40,10 +40,13 @@ def maintain_slots(inventory, max_stack_size=64):
             button.item = Item(button.item.image, button.item.name, overflow)
 
 
-def ui_render(
+def render_ui(
     window,
     inventory,
+    held,
+    external_interface,
     inv_view,
+    interface_view,
     selection,
     scroll_bar=[0, 1, 2, 3, 4, 5],
 ):
@@ -51,15 +54,21 @@ def ui_render(
     if inv_view:
         for slot in inventory:
             window.blit(inv_slot_img, slot.rect)
-            slot.item.display(slot.rect, window)
+            if slot.item is not None:
+                slot.item.display(slot.rect, window)
     else:
         for slot_num in scroll_bar:
             window.blit(inv_slot_img, inventory[slot_num].rect)
-            inventory[slot].item.display(inventory[slot_num].rect, window)
+            if inventory[slot_num].item is not None:
+                inventory[slot_num].item.display(inventory[slot_num].rect, window)
     pygame.draw.rect(window, (0, 0, 0), inventory[selection])
-    # to implement
-    if held is not None:
-        pos = pygame.mouse.get_pos()
-        pos = [pos[0] - block_size / 2, pos[1] - block_size / 2]
-        win.blit(held[0], pos)
-        blit_text(win, str(held[1]), pos=pos, size=20)
+    if interface_view:
+        for slot in external_interface:
+            window.blit(inv_slot_img, slot.rect)
+            slot.item.display(slot.rect, window)
+    # checks for held item
+    if held.item is not None:
+        x, y = pygame.mouse.get_pos()
+        pos = (x - block_size / 2, y - block_size / 2)
+        window.blit(held.item, pos)
+        blit_text(window, str(held.item.name), pos=pos, size=20)

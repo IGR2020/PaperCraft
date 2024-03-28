@@ -1,5 +1,4 @@
-import os
-from random import choice, randint
+from random import randint
 from math import floor
 
 import pygame
@@ -7,10 +6,12 @@ import pygame
 from pygame_tools import blit_text, Button
 
 from player import Player
-from objects import Block, Item
+from objects import Block, Item, Slot
 
 from perlin_noise import PerlinNoise
 from constants import *
+
+from ui import render_ui, maintain_slots, find_slot
 
 def generate_world():
     objects = []
@@ -18,10 +19,10 @@ def generate_world():
     for x in range(-WIDTH * 8 // block_size, WIDTH * 8 // block_size):
         current_height = round(noise((x*terrain_smoothness, 0))*terrain_variation)
         for y in range(current_height, 30):
-            objects.append(Block(stone, x * block_size, y * block_size, block_size))
+            objects.append(Block(stone, x * block_size, y * block_size, block_size, "Stone"))
         objects.append(
             Block(
-                dirt, x * block_size, (current_height - 1) * block_size, block_size
+                dirt, x * block_size, (current_height - 1) * block_size, block_size, "Dirt"
             )
         )
         objects.append(
@@ -30,22 +31,23 @@ def generate_world():
                 x * block_size,
                 (current_height - 2) * block_size,
                 block_size,
+                "Grass"
             )
         )
         if  randint(1, 20) == 1:
             for i in range(current_height - 5, current_height - 2):
                 objects.append(
-                    Block(wood, x * block_size, i * block_size, block_size)
+                    Block(wood, x * block_size, i * block_size, block_size, "Wood")
                 )
             for i in range(current_height - 8, current_height - 5):
                 objects.append(
-                    Block(leaf, x * block_size, i * block_size, block_size)
+                    Block(leaf, x * block_size, i * block_size, block_size, "Leaf")
                 )
                 objects.append(
-                    Block(leaf, (x - 1) * block_size, i * block_size, block_size)
+                    Block(leaf, (x - 1) * block_size, i * block_size, block_size, "Leaf")
                 )
                 objects.append(
-                    Block(leaf, (x + 1) * block_size, i * block_size, block_size)
+                    Block(leaf, (x + 1) * block_size, i * block_size, block_size, "Leaf")
                 )
     return objects
 
@@ -225,54 +227,48 @@ def crafting():
 
 # noinspection PyShadowingNames
 def setpos(pos):
-    if pos[1] % block_size != 0:
-        pos[1] -= 1
-    if pos[0] % block_size != 0:
-        pos[0] -= 1
-    if pos[0] % block_size != 0 or pos[1] % block_size != 0:
-        setpos(pos)
+    x, y = pos
+    x -= x % block_size
+    y -= y % block_size
+    pos = x, y
     return pos
+
 def delete_block():
-    pos = pygame.mouse.get_pos()
-    pos = [*pos]
-    pos[0] += x_offset
-    pos[1] += y_offset
+    x, y = pygame.mouse.get_pos()
+    x += x_offset
+    y += y_offset
     for obj in blocks_loaded:
-        if obj.rect.collidepoint(pos):
-            index = check_slots(obj.img)
-            if index is None:
+        if obj.rect.collidepoint((x, y)):
+            slot = find_slot(obj.name, inventory)
+            if slot is None:
                 return
-            if inventory[index] is None:
-                inventory.pop(index)
-                inventory.insert(index, [obj.img, 0])
-            inventory[index][1] += 1
+            if inventory[slot].item is None:
+                inventory[slot].item = Item(obj.img, obj.name, 1)
+            else:
+                inventory[slot].item.count += 1
             blocks_loaded.remove(obj)
-            for item in blocks:
-                if item.rect.collidepoint(pos):
-                    blocks.remove(item)
-                    return
+    for item in blocks:
+        if item.rect.collidepoint((x, y)):
+            blocks.remove(item)
+            return
 
 
 # noinspection PyShadowingNames
 def place_block():
-    if inventory[selection] is None:
+    if inventory[selection].item is None:
         return
-    pos = pygame.mouse.get_pos()
-    pos = [*pos]
-    pos[0] += x_offset
-    pos[1] += y_offset
-    pos = [floor(pos[0]), floor(pos[1])]
+    x, y = pygame.mouse.get_pos()
+    x += x_offset
+    y += y_offset
+    if player.rect.collidepoint((x, y)):
+        return
     for obj in blocks_loaded:
-        if obj.rect.collidepoint(pos):
-            return obj.img
-    if pos[0] % block_size != 0 or pos[1] % block_size != 0:
-        pos = setpos(pos)
-    rect = pygame.Rect(*pos, block_size, block_size)
-    if not player.rect.colliderect(rect):
-        if inventory[selection][1] > 0:
-            blocks_loaded.append(Block(inventory[selection][0], *pos, block_size))
-            blocks.append(Block(inventory[selection][0], *pos, block_size))
-            inventory[selection][1] -= 1
+        if obj.rect.collidepoint((x, y)):
+            return
+    x, y = setpos((x, y))
+    blocks_loaded.append(Block(inventory[selection].item.image, x, y, block_size, inventory[selection].item.name))
+    blocks.append(Block(inventory[selection].item.image, x, y, block_size, inventory[selection].item.name))
+    inventory[selection].item.count -= 1
 
 
 def display():
@@ -280,47 +276,30 @@ def display():
     for obj in blocks_loaded:
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
-    ui_render()
+    render_ui(window, inventory, held, None, inv_view, False, selection)
     pygame.display.update()
 
 
 if __name__ == "__main__":
-    stack_size = 64
-    slot_size = 70
     blocks = generate_world()
     blocks_loaded = []
     player = Player(player_img, 40, 95)
     y_offset = 0
     x_offset = 0
     scroll_area = 100
-    scroll_bar = []
-    inventory = [[craft, 10], [planks, 10], [wood, 64]]
+
+    # inventory creation
+    inventory = []
+    for j in range(6, 1, -1):
+        for i in range(3, 9):
+            inventory.append(Slot((i*slot_size,j*slot_size),None))
+    held = Slot((200, 200), None)
     craft_inv = []
     selection = 0
-    for i in range(30):
-        inventory.append(None)
-    for i in range(10):
-        craft_inv.append(None)
     inv_view = False
     craft_view = False
-    held = None
-    inv_slots = []
     craft_slot = []
     craft_button = Button([10 * slot_size + 5, 2 * slot_size - 5], arrow)
-    for i in range(3, 9):
-        scroll_bar.append(
-            pygame.Rect(
-                i * 70,
-                HEIGHT - 70,
-                70,
-                70,
-            )
-        )
-    for i in range(3, 9):
-        for j in range(2, 6):
-            inv_slots.append(
-                pygame.Rect(i * slot_size, j * slot_size, slot_size, slot_size)
-            )
     for i in range(9, 12):
         for j in range(3, 6):
             craft_slot.append(
@@ -335,8 +314,6 @@ if __name__ == "__main__":
             and 0 - block_size < block.rect.y - y_offset < HEIGHT + block_size
         ):
             blocks_loaded.append(block)
-    all_slots = [*scroll_bar, *inv_slots]
-
     while RUN:
         CLOCK.tick(FPS)
 
@@ -366,16 +343,9 @@ if __name__ == "__main__":
                             selection = 0
                 if inv_view:
                     if event.button == 1:
-                        left_inv(all_slots, inventory)
-                        if craft_view:
-                            left_inv(craft_slot, craft_inv)
-                            if craft_button.clicked():
-                                crafting()
+                        pass
                     if event.button == 3:
-                        right_inv(all_slots, inventory)
-                        if craft_view:
-                            right_inv(craft_slot, craft_inv)
-
+                        pass
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
@@ -417,7 +387,7 @@ if __name__ == "__main__":
                 ):
                     blocks_loaded.append(block)
 
-        check_stack()
+        maintain_slots(inventory)
         player.loop(blocks_loaded)
         display()
 

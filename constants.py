@@ -14,6 +14,9 @@ block_size = 50
 terrain_smoothness = 0.03
 terrain_variation = 30
 
+stack_size = 64
+slot_size = 70
+
 grass = pygame.transform.scale(
     pygame.image.load(os.path.join("assets", "grass.jpeg")), (50, 50)
 )

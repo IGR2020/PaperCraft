@@ -16,19 +16,21 @@ def blit_text(
 
 
 class Button:
-    def __init__(self, pos, text, scale=1):
-        self.x, self.y = pos
-        self.width, self.height = text.get_width() * scale, text.get_height() * scale
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.image = pygame.transform.scale(text, (self.width, self.height))
+    def __init__(self, pos, image, scale=1):
+        x, y = pos
+        width, height = image.get_width() * scale, image.get_height() * scale
+        self.rect = pygame.Rect(x, y, width, height)
+        self.image = pygame.transform.scale(image, (width, height))
 
     def clicked(self):
         pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(pos):
             return True
+        return False
 
     def display(self, win):
         win.blit(self.image, self.rect)
+
 
 def load_assets(path, size: int = None):
     sprites = {}
@@ -37,6 +39,7 @@ def load_assets(path, size: int = None):
             if size is None:
                 sprites[file.replace(".png", "")] = pygame.image.load(join(path, file))
             else:
-                sprites[file.replace(".png", "")] = pygame.transform.scale(pygame.image.load(join(path, file)), size)
+                sprites[file.replace(".png", "")] = pygame.transform.scale(
+                    pygame.image.load(join(path, file)), size
+                )
     return sprites
-
