@@ -16,37 +16,15 @@ terrain_smoothness = 0.02
 terrain_variation = 30
 
 stack_size = 64
-slot_size = 70
+slot_size = 48
+
+scroll_area = 100
 
 block_images = load_assets("assets\Blocks", (block_size, block_size))
 
-grass = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "grass.jpeg")), (50, 50)
-)
-dirt = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "dirt.jpeg")), (50, 50)
-)
-stone = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "stone.jpeg")), (50, 50)
-)
-wood = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "wood.jpeg")), (50, 50)
-)
-leaf = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "leaf.jpeg")), (50, 50)
-)
 player_img = pygame.transform.scale(
     pygame.image.load(os.path.join("assets", "player.jpeg")), (28, 56)
 )
 inv_slot_img = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "slot.jpeg")), (70, 70)
-)
-arrow = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "arrow.jpeg")), (70, 70)
-)
-craft = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "craft.jpeg")), (50, 50)
-)
-planks = pygame.transform.scale(
-    pygame.image.load(os.path.join("assets", "planks.jpeg")), (50, 50)
+    pygame.image.load(os.path.join("assets", "slot.jpeg")), (slot_size, slot_size)
 )

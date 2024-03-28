@@ -31,4 +31,5 @@ __2dminecraft-V-0.4__
 
 __2dminecraft-V-0.5__
     + new assets
+    + new crafting system (work in progress)
     

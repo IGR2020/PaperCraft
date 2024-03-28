@@ -3,7 +3,6 @@ from objects import Item
 from pygame_tools import blit_text
 from constants import inv_slot_img, block_size
 
-
 # finds available or matching slots for an item
 def find_slot(item_name, inventory, max_stack_count=64):
     for i, button in enumerate(inventory):
@@ -13,6 +12,7 @@ def find_slot(item_name, inventory, max_stack_count=64):
             return i
     else:
         return None
+
 
 # checking for proper inventory
 def maintain_slots(inventory, max_stack_size=64):
@@ -39,10 +39,12 @@ def maintain_slots(inventory, max_stack_size=64):
             button.item = Item(button.item.image, button.item.name, overflow)
     return
 
+
 def maintain_inventory(inventory, held, external_inventroy, max_stack_size=64):
     maintain_slots(inventory, max_stack_size)
     maintain_slots([held], max_stack_size)
-    maintain_slots(external_inventroy, max_stack_size)
+    if external_inventroy is not None:
+        maintain_slots(external_inventroy, max_stack_size)
 
 
 # rendering ui (inventory + held item + external inventory if there is one)
@@ -70,9 +72,11 @@ def render_ui(
     pygame.draw.rect(window, (0, 0, 0), inventory[selection])
     if inventory[selection].item is not None:
         inventory[selection].item.display(inventory[selection].rect, window)
-    if interface_view:
+    if interface_view and external_interface is not None:
         for slot in external_interface:
             window.blit(inv_slot_img, slot.rect)
+            if slot.item is None:
+                continue
             slot.item.display(slot.rect, window)
     # checks for held item
     if held.item is not None:

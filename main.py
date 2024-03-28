@@ -5,7 +5,7 @@ import pygame
 from pygame_tools import blit_text, Button
 
 from player import Player
-from objects import Block, Item, Slot
+from objects import Block, Item, Slot, CraftingTable
 
 from perlin_noise import PerlinNoise
 from constants import *
@@ -20,7 +20,13 @@ def generate_world():
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
         for y in range(current_height, 30):
             objects.append(
-                Block(block_images["Stone"], x * block_size, y * block_size, block_size, "Stone")
+                Block(
+                    block_images["Stone"],
+                    x * block_size,
+                    y * block_size,
+                    block_size,
+                    "Stone",
+                )
             )
         objects.append(
             Block(
@@ -40,63 +46,35 @@ def generate_world():
                 "Grass",
             )
         )
-        if randint(1, 20) == 1 and False:
+        if randint(1, 20) == 1:
             for i in range(current_height - 5, current_height - 2):
                 objects.append(
-                    Block(wood, x * block_size, i * block_size, block_size, "Wood")
+                    Block(block_images["Oak Wood"], x * block_size, i * block_size, block_size, "Wood")
                 )
             for i in range(current_height - 8, current_height - 5):
                 objects.append(
-                    Block(leaf, x * block_size, i * block_size, block_size, "Leaf")
+                    Block(block_images["Oak Leaves"], x * block_size, i * block_size, block_size, "Leaf")
                 )
                 objects.append(
                     Block(
-                        leaf, (x - 1) * block_size, i * block_size, block_size, "Leaf"
+                        block_images["Oak Leaves"], (x - 1) * block_size, i * block_size, block_size, "Leaf"
                     )
                 )
                 objects.append(
                     Block(
-                        leaf, (x + 1) * block_size, i * block_size, block_size, "Leaf"
+                        block_images["Oak Leaves"], (x + 1) * block_size, i * block_size, block_size, "Leaf"
                     )
                 )
     return objects
 
 
 def crafting():
-    recipe = []
-    for item in range(9):
-        if craft_inv[item] is not None:
-            recipe.append([craft_inv[item][0], item])
-    # planks
-    if len(recipe) == 1 and recipe[0][0] == wood:
-        if craft_inv[9] is None:
-            craft_inv.pop(9)
-            craft_inv.append([planks, 4])
-        elif craft_inv[9][0] == planks:
-            craft_inv[9][1] += 4
-        else:
-            return
-        craft_inv[recipe[0][1]][1] -= 1
-    # craft table
-    cft = 0
-    for item in recipe:
-        if item[0] == planks:
-            cft += 1
-    if cft == 4:
-        if (
-            recipe[1][1] == recipe[0][1] + 1
-            and recipe[2][1] == recipe[0][1] + 3
-            and recipe[3][1] == recipe[0][1] + 4
-        ):
-            if craft_inv[9] is None:
-                craft_inv.pop(9)
-                craft_inv.append([craft, 1])
-            elif craft_inv[9][0] == craft:
-                craft_inv[9][1] += 1
-            else:
-                return
-            for item in recipe:
-                craft_inv[item[1]][1] -= 1
+    recipe_components = []
+    for slot in external_inventory:
+        if slot.item is not None:
+            recipe_components.append(slot.item.name)
+    if recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
+        return
 
 
 # noinspection PyShadowingNames
@@ -129,20 +107,41 @@ def delete_block():
 
 
 # activated opon request to place block
-def place_block():
-    if inventory[selection].item is None:
-        return
+def right_click():
     x, y = pygame.mouse.get_pos()
     x += x_offset
     y += y_offset
-    # check for collisions
-    if player.rect.collidepoint((x, y)):
-        return
+    # check for interation
     for obj in blocks_loaded:
         if obj.rect.collidepoint((x, y)):
+            interact(obj)
             return
+    # checking for illegal placement
+    if inventory[selection].item is None:
+        return
+    if player.rect.collidepoint((x, y)):
+        return
     # placing block
     x, y = setpos((x, y))
+    if  inventory[selection].item.name == "Crafting Table":
+        blocks_loaded.append(
+        CraftingTable(
+            inventory[selection].item.image,
+            x,
+            y,
+            block_size,
+            )
+        )
+        blocks.append(
+            CraftingTable(
+                inventory[selection].item.image,
+                x,
+                y,
+                block_size,
+            )
+        )
+        return
+    inventory[selection].item.count -= 1
     blocks_loaded.append(
         Block(
             inventory[selection].item.image,
@@ -163,13 +162,20 @@ def place_block():
     )
     inventory[selection].item.count -= 1
 
+def interact(obj):
+    global external_inventory, inv_view, external_inventory_type
+    if obj.name == "Crafting Table":
+        external_inventory = obj.inventory
+        inv_view = True
+        external_inventory_type = "Crafting"
+
 
 def display():
     window.fill((150, 150, 255))
     for obj in blocks_loaded:
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
-    render_ui(window, inventory, held, None, inv_view, False, selection)
+    render_ui(window, inventory, held, external_inventory, inv_view, inv_view, selection)
     pygame.display.update()
 
 
@@ -179,14 +185,18 @@ if __name__ == "__main__":
     player = Player(player_img, 28, 56)
     y_offset = 0
     x_offset = 0
-    scroll_area = 100
 
     # inventory creation
     inventory = []
-    for j in range(6, 1, -1):
-        for i in range(3, 9):
+    for j in range(9, 4, -1):
+        for i in range(6, 12):
             inventory.append(Slot((i * slot_size, j * slot_size), None))
     held = Slot((200, 200), None)
+    external_inventory = None
+    external_inventory_type = None
+
+    # temporary testing
+    inventory[0].item = Item(block_images["Crafting Table"], "Crafting Table", 10)
 
     selection = 0
     inv_view = False
@@ -209,9 +219,7 @@ if __name__ == "__main__":
                     if event.button == 1:
                         delete_block()
                     if event.button == 3:
-                        if place_block() == craft:
-                            craft_view = True
-                            inv_view = True
+                        right_click()
                     if event.button == 4:
                         selection += 1
                         if selection >= 6:
@@ -226,11 +234,14 @@ if __name__ == "__main__":
                             selection = 0
                 else:
                     manage_inventory(event, inventory, held)
+                    if external_inventory is not None:
+                        manage_inventory(event, external_inventory, held)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
                 if event.key == pygame.K_e:
                     inv_view = not inv_view
+                    external_inventory = None
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
@@ -245,8 +256,12 @@ if __name__ == "__main__":
             blocks_loaded = []
             for block in blocks:
                 if (
-                    0 - block_size * 3 < block.rect.x - x_offset < WIDTH + block_size * 3
-                    and 0 - block_size * 3 < block.rect.y - y_offset < HEIGHT + block_size * 3
+                    0 - block_size * 3
+                    < block.rect.x - x_offset
+                    < WIDTH + block_size * 3
+                    and 0 - block_size * 3
+                    < block.rect.y - y_offset
+                    < HEIGHT + block_size * 3
                 ):
                     blocks_loaded.append(block)
 
@@ -257,12 +272,16 @@ if __name__ == "__main__":
             blocks_loaded = []
             for block in blocks:
                 if (
-                    0 - block_size * 3 < block.rect.x - x_offset < WIDTH + block_size * 3
-                    and 0 - block_size * 3 < block.rect.y - y_offset < HEIGHT + block_size * 3
+                    0 - block_size * 3
+                    < block.rect.x - x_offset
+                    < WIDTH + block_size * 3
+                    and 0 - block_size * 3
+                    < block.rect.y - y_offset
+                    < HEIGHT + block_size * 3
                 ):
                     blocks_loaded.append(block)
 
-        maintain_inventory(inventory, held, [])
+        maintain_inventory(inventory, held, external_inventory)
         player.loop(blocks_loaded)
         display()
 

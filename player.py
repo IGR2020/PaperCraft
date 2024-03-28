@@ -10,19 +10,15 @@ class Player(pygame.sprite.Sprite):
         self.x_vel = 0
         self.fall_speed = 0.2
         self.jump_count = 0
-        self.inventory = []
-        for i in range(30):
-            self.inventory.append(None)
-        self.selection = 0
 
     def render(self, screen, x_offset, y_offset):
         screen.blit(self.img, (self.rect.x - x_offset, self.rect.y - y_offset))
 
     def loop(self, objects):
         self.y_vel += self.fall_speed
-        self.y_vel = min(10, self.y_vel)
+        self.y_vel = min(16, self.y_vel)
         self.rect.y += self.y_vel
-        
+
         for obj in objects:
             if self.rect.colliderect(obj.rect):
                 if self.y_vel > 0:
