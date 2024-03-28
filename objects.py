@@ -31,7 +31,7 @@ class Item:
         blit_text(
                 window,
                 str(self.count),
-                (rect.x, rect.y),
+                (rect.x + 10, rect.y + 10),
                 size=20,
             )
 
