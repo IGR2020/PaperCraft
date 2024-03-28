@@ -35,11 +35,10 @@ class Button:
 def load_assets(path, size: int = None):
     sprites = {}
     for file in listdir(path):
-        if isfile(file):
-            if size is None:
-                sprites[file.replace(".png", "")] = pygame.image.load(join(path, file))
-            else:
-                sprites[file.replace(".png", "")] = pygame.transform.scale(
-                    pygame.image.load(join(path, file)), size
-                )
+        if size is None:
+            sprites[file.replace(".png", "")] = pygame.image.load(join(path, file))
+        else:
+            sprites[file.replace(".png", "")] = pygame.transform.scale(
+                pygame.image.load(join(path, file)), size
+            )
     return sprites

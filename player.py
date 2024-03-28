@@ -4,7 +4,7 @@ import pygame
 class Player(pygame.sprite.Sprite):
     def __init__(self, image, width, height):
         super().__init__()
-        self.rect = pygame.Rect(450, -2000, width, height)
+        self.rect = pygame.Rect(450, -3000, width, height)
         self.img = image
         self.y_vel = 0
         self.x_vel = 0

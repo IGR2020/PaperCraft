@@ -28,4 +28,7 @@ __2dminecraft-V-0.4__
     + new ui rendering scheme
     + new inventory manegment system
     - crafting temporarily suspended
+
+__2dminecraft-V-0.5__
+    + new assets
     

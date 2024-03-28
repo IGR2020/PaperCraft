@@ -20,11 +20,11 @@ def generate_world():
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
         for y in range(current_height, 30):
             objects.append(
-                Block(stone, x * block_size, y * block_size, block_size, "Stone")
+                Block(block_images["Stone"], x * block_size, y * block_size, block_size, "Stone")
             )
         objects.append(
             Block(
-                dirt,
+                block_images["Dirt"],
                 x * block_size,
                 (current_height - 1) * block_size,
                 block_size,
@@ -33,14 +33,14 @@ def generate_world():
         )
         objects.append(
             Block(
-                grass,
+                block_images["Grass"],
                 x * block_size,
                 (current_height - 2) * block_size,
                 block_size,
                 "Grass",
             )
         )
-        if randint(1, 20) == 1:
+        if randint(1, 20) == 1 and False:
             for i in range(current_height - 5, current_height - 2):
                 objects.append(
                     Block(wood, x * block_size, i * block_size, block_size, "Wood")
@@ -176,7 +176,7 @@ def display():
 if __name__ == "__main__":
     blocks = generate_world()
     blocks_loaded = []
-    player = Player(player_img, 40, 95)
+    player = Player(player_img, 28, 56)
     y_offset = 0
     x_offset = 0
     scroll_area = 100
@@ -187,26 +187,16 @@ if __name__ == "__main__":
         for i in range(3, 9):
             inventory.append(Slot((i * slot_size, j * slot_size), None))
     held = Slot((200, 200), None)
-    craft_inv = []
+
     selection = 0
     inv_view = False
-    craft_view = False
-    craft_slot = []
-    craft_button = Button([10 * slot_size + 5, 2 * slot_size - 5], arrow)
-    for i in range(9, 12):
-        for j in range(3, 6):
-            craft_slot.append(
-                pygame.Rect(i * slot_size + 5, j * slot_size, slot_size, slot_size)
-            )
-    craft_slot.append(
-        pygame.Rect(10 * slot_size + 5, 1 * slot_size - 10, slot_size, slot_size)
-    )
     for block in blocks:
         if (
             0 - block_size < block.rect.x - x_offset < WIDTH + block_size
             and 0 - block_size < block.rect.y - y_offset < HEIGHT + block_size
         ):
             blocks_loaded.append(block)
+
     while RUN:
         CLOCK.tick(FPS)
 
@@ -241,11 +231,6 @@ if __name__ == "__main__":
                     player.jump()
                 if event.key == pygame.K_e:
                     inv_view = not inv_view
-                    if craft_view:
-                        for item in craft_inv:
-                            if item is not None:
-                                pass
-                        craft_view = False
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
@@ -260,8 +245,8 @@ if __name__ == "__main__":
             blocks_loaded = []
             for block in blocks:
                 if (
-                    0 - block_size < block.rect.x - x_offset < WIDTH + block_size
-                    and 0 - block_size < block.rect.y - y_offset < HEIGHT + block_size
+                    0 - block_size * 3 < block.rect.x - x_offset < WIDTH + block_size * 3
+                    and 0 - block_size * 3 < block.rect.y - y_offset < HEIGHT + block_size * 3
                 ):
                     blocks_loaded.append(block)
 
@@ -272,8 +257,8 @@ if __name__ == "__main__":
             blocks_loaded = []
             for block in blocks:
                 if (
-                    0 - block_size < block.rect.x - x_offset < WIDTH + block_size
-                    and 0 - block_size < block.rect.y - y_offset < HEIGHT + block_size
+                    0 - block_size * 3 < block.rect.x - x_offset < WIDTH + block_size * 3
+                    and 0 - block_size * 3 < block.rect.y - y_offset < HEIGHT + block_size * 3
                 ):
                     blocks_loaded.append(block)
 
