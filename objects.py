@@ -1,6 +1,6 @@
 import pygame
 from pygame_tools import blit_text, Button
-from constants import inv_slot_img, slot_size
+from constants import inv_slot_img, slot_size, arrow_img
 
 
 class Object(pygame.sprite.Sprite):
@@ -35,6 +35,7 @@ class Item:
             size=15,
         )
 
+
 class CraftingTable(Block):
     def __init__(self, image, x, y, size):
         super().__init__(image, x, y, size, "Crafting Table")
@@ -42,8 +43,10 @@ class CraftingTable(Block):
         for j in range(9, 6, -1):
             for i in range(13, 16):
                 self.inventory.append(Slot((i * slot_size, j * slot_size), None))
-        self.inventory.append(Slot((14*slot_size,4*slot_size), None))
-        
+        self.result_inventory = [
+            Slot((14 * slot_size, 5 * slot_size), None),
+            Slot((14 * slot_size, 6 * slot_size), None, 1, arrow_img),
+        ]
 
 
 class EntityItem:
@@ -69,6 +72,9 @@ class EntityItem:
 
 
 class Slot(Button):
-    def __init__(self, pos, item: Item, scale=1):
-        super().__init__(pos, inv_slot_img, scale)
+    def __init__(self, pos, item: Item, scale=1, image=None):
+        if image is None:
+            super().__init__(pos, inv_slot_img, scale)
+        else:
+            super().__init__(pos, image, scale)
         self.item = item

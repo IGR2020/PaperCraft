@@ -1,7 +1,7 @@
 import pygame
 from objects import Item
 from pygame_tools import blit_text
-from constants import inv_slot_img, block_size
+from constants import block_size, block_images
 
 # finds available or matching slots for an item
 def find_slot(item_name, inventory, max_stack_count=64):
@@ -40,11 +40,13 @@ def maintain_slots(inventory, max_stack_size=64):
     return
 
 
-def maintain_inventory(inventory, held, external_inventroy, max_stack_size=64):
+def maintain_inventory(inventory, held, external_inventory, result_inventory, max_stack_size=64):
     maintain_slots(inventory, max_stack_size)
     maintain_slots([held], max_stack_size)
-    if external_inventroy is not None:
-        maintain_slots(external_inventroy, max_stack_size)
+    if external_inventory is not None:
+        maintain_slots(external_inventory, max_stack_size)
+    if result_inventory is not None:
+        maintain_slots(result_inventory, max_stack_size)
 
 
 # rendering ui (inventory + held item + external inventory if there is one)
@@ -53,6 +55,7 @@ def render_ui(
     inventory,
     held,
     external_interface,
+    result_inventory,
     inv_view,
     interface_view,
     selection,
@@ -61,12 +64,12 @@ def render_ui(
     # drawing inventory slots
     if inv_view:
         for slot in inventory:
-            window.blit(inv_slot_img, slot.rect)
+            slot.display(window)
             if slot.item is not None:
                 slot.item.display(slot.rect, window)
     else:
         for slot_num in scroll_bar:
-            window.blit(inv_slot_img, inventory[slot_num].rect)
+            inventory[slot_num].display(window)
             if inventory[slot_num].item is not None:
                 inventory[slot_num].item.display(inventory[slot_num].rect, window)
     pygame.draw.rect(window, (0, 0, 0), inventory[selection])
@@ -74,7 +77,13 @@ def render_ui(
         inventory[selection].item.display(inventory[selection].rect, window)
     if interface_view and external_interface is not None:
         for slot in external_interface:
-            window.blit(inv_slot_img, slot.rect)
+            slot.display(window)
+            if slot.item is None:
+                continue
+            slot.item.display(slot.rect, window)
+    if interface_view and result_inventory is not None:
+        for slot in result_inventory:
+            slot.display(window)
             if slot.item is None:
                 continue
             slot.item.display(slot.rect, window)
@@ -87,7 +96,7 @@ def render_ui(
 
 
 # inventory manegment
-def manage_inventory(event, inventory, held):
+def manage_inventory(event, inventory, held,):
     x, y = pygame.mouse.get_pos()
 
     # finding slot
@@ -121,3 +130,40 @@ def manage_inventory(event, inventory, held):
                 else:
                     held.item, slot.item = slot.item, held.item
                 return
+
+def craft(external_inventory):
+    recipe_components = []
+    for slot in external_inventory:
+        if slot.item is not None:
+            recipe_components.append(slot.item.name)
+    if recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
+        return Item(block_images["Oak Planks"], "Oak Planks", 4)
+    else:
+        return None
+
+
+def manage_all_inventories(event, held, result_inventory, external_inventory_type, inventory, external_inventory):
+    manage_inventory(event, inventory, held)
+    if external_inventory is not None:
+        manage_inventory(event, external_inventory, held)
+    x, y = pygame.mouse.get_pos()
+    if external_inventory_type == "Crafting":
+        if result_inventory[0].rect.collidepoint((x, y)):
+            item = craft(external_inventory)
+            if item is None:
+                return
+            if event.button == 1:
+                if held.item is None:
+                    held.item = item
+                elif item is not None:
+                    if held.item.name == item.name:
+                        held.item.count += item.count
+            elif event.button == 3:
+                slot_index = find_slot(item.name, inventory)
+                if inventory[slot_index].item is not None and item is not None:
+                    inventory[slot_index].item.count += item.count
+                if inventory[slot_index].item is None:
+                    inventory[slot_index].item = item 
+                result_inventory[1].item = None
+    
+    

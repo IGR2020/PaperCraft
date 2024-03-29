@@ -28,3 +28,7 @@ player_img = pygame.transform.scale(
 inv_slot_img = pygame.transform.scale(
     pygame.image.load(os.path.join("assets", "slot.jpeg")), (slot_size, slot_size)
 )
+
+arrow_img = pygame.transform.scale(
+    pygame.image.load(os.path.join("assets", "arrow.png")), (slot_size, slot_size)
+)

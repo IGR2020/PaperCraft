@@ -10,7 +10,7 @@ from objects import Block, Item, Slot, CraftingTable
 from perlin_noise import PerlinNoise
 from constants import *
 
-from ui import render_ui, find_slot, manage_inventory, maintain_inventory
+from ui import render_ui, find_slot, manage_inventory, maintain_inventory, manage_all_inventories
 
 
 def generate_world():
@@ -66,15 +66,6 @@ def generate_world():
                     )
                 )
     return objects
-
-
-def crafting():
-    recipe_components = []
-    for slot in external_inventory:
-        if slot.item is not None:
-            recipe_components.append(slot.item.name)
-    if recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
-        return
 
 
 # noinspection PyShadowingNames
@@ -163,11 +154,12 @@ def right_click():
     inventory[selection].item.count -= 1
 
 def interact(obj):
-    global external_inventory, inv_view, external_inventory_type
+    global external_inventory, inv_view, external_inventory_type, result_inventory
     if obj.name == "Crafting Table":
         external_inventory = obj.inventory
         inv_view = True
         external_inventory_type = "Crafting"
+        result_inventory = obj.result_inventory
 
 
 def display():
@@ -175,7 +167,7 @@ def display():
     for obj in blocks_loaded:
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
-    render_ui(window, inventory, held, external_inventory, inv_view, inv_view, selection)
+    render_ui(window, inventory, held, external_inventory, result_inventory, inv_view, inv_view, selection)
     pygame.display.update()
 
 
@@ -194,6 +186,7 @@ if __name__ == "__main__":
     held = Slot((200, 200), None)
     external_inventory = None
     external_inventory_type = None
+    result_inventory = None
 
     # temporary testing
     inventory[0].item = Item(block_images["Crafting Table"], "Crafting Table", 10)
@@ -233,15 +226,15 @@ if __name__ == "__main__":
                         if selection >= 6:
                             selection = 0
                 else:
-                    manage_inventory(event, inventory, held)
-                    if external_inventory is not None:
-                        manage_inventory(event, external_inventory, held)
+                    manage_all_inventories(event, held, result_inventory, external_inventory_type, inventory, external_inventory)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
                 if event.key == pygame.K_e:
                     inv_view = not inv_view
                     external_inventory = None
+                    result_inventory = None
+                    external_inventory_type = None
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
@@ -281,7 +274,7 @@ if __name__ == "__main__":
                 ):
                     blocks_loaded.append(block)
 
-        maintain_inventory(inventory, held, external_inventory)
+        maintain_inventory(inventory, held, external_inventory, result_inventory)
         player.loop(blocks_loaded)
         display()
 
