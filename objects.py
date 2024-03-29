@@ -48,6 +48,14 @@ class CraftingTable(Block):
             Slot((14 * slot_size, 6 * slot_size), None, 1, arrow_img),
         ]
 
+class Chest(Block):
+    def __init__(self, image, x, y, size):
+        super().__init__(image, x, y, size, "Chest")
+        self.inventory = []
+        for j in range(9, 3, -1):
+            for i in range(13, 17):
+                self.inventory.append(Slot((i * slot_size, j * slot_size), None))
+        self.result_inventory = None
 
 class EntityItem:
     def __init__(self, img, size, pos):

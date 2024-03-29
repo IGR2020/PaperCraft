@@ -36,6 +36,6 @@ __2dminecraft-V-0.4__
 __2dminecraft-V-0.5__
     + new assets
     + new crafting system
-    : 3 crafting recipies
-
-    
+    : 4 crafting recipies
+    + trees now spawn 1 in 7 (previous 1 in 20) 
+    + chests

@@ -141,12 +141,14 @@ def craft(external_inventory):
             rci.append(i)
     if len(recipe_components) < 1:
         return (None, None)
-    if recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
+    elif recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
         return (Item(block_images["Oak Planks"], "Oak Planks", 4), recipe_components)
-    if recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
+    elif recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
         return (Item(block_images["Crafting Table"], "Crafting Table", 1), recipe_components)
-    if recipe_components == ["Stone", "Stone", "Stone", "Stone"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
+    elif recipe_components == ["Stone", "Stone", "Stone", "Stone"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
         return (Item(block_images["Stone Brick"], "Stone Brick", 4), recipe_components)
+    elif len(recipe_components) == 8 and rci == [0, 1, 2, 3, 5, 6, 7, 8]:
+        return (Item(block_images["Chest"], "Chest", 1), recipe_components)
     else:
         return (None, None)
 
@@ -169,6 +171,7 @@ def manage_all_inventories(event, held, result_inventory, external_inventory_typ
                         continue
                     if slot.item.name == item_used:
                         slot.item.count -= 1
+                        maintain_slots(external_inventory)
                         break
             if event.button == 1:
                 if held.item is None:
@@ -183,5 +186,7 @@ def manage_all_inventories(event, held, result_inventory, external_inventory_typ
                 if inventory[slot_index].item is None:
                     inventory[slot_index].item = result_inventory[0].item 
                 result_inventory[1].item = None
+    elif external_inventory_type == "Chest":
+        return
     
     

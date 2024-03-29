@@ -5,12 +5,18 @@ import pygame
 from pygame_tools import blit_text, Button
 
 from player import Player
-from objects import Block, Item, Slot, CraftingTable
+from objects import Block, Item, Slot, CraftingTable, Chest
 
 from perlin_noise import PerlinNoise
 from constants import *
 
-from ui import render_ui, find_slot, manage_inventory, maintain_inventory, manage_all_inventories
+from ui import (
+    render_ui,
+    find_slot,
+    manage_inventory,
+    maintain_inventory,
+    manage_all_inventories,
+)
 
 
 def generate_world():
@@ -46,23 +52,43 @@ def generate_world():
                 "Grass",
             )
         )
-        if randint(1, 20) == 1:
+        if randint(1, 7) == 1:
             for i in range(current_height - 5, current_height - 2):
                 objects.append(
-                    Block(block_images["Oak Wood"], x * block_size, i * block_size, block_size, "Oak Wood")
+                    Block(
+                        block_images["Oak Wood"],
+                        x * block_size,
+                        i * block_size,
+                        block_size,
+                        "Oak Wood",
+                    )
                 )
             for i in range(current_height - 8, current_height - 5):
                 objects.append(
-                    Block(block_images["Oak Leaves"], x * block_size, i * block_size, block_size, "Oak Leaf")
-                )
-                objects.append(
                     Block(
-                        block_images["Oak Leaves"], (x - 1) * block_size, i * block_size, block_size, "Oak Leaf"
+                        block_images["Oak Leaves"],
+                        x * block_size,
+                        i * block_size,
+                        block_size,
+                        "Oak Leaf",
                     )
                 )
                 objects.append(
                     Block(
-                        block_images["Oak Leaves"], (x + 1) * block_size, i * block_size, block_size, "Oak Leaf"
+                        block_images["Oak Leaves"],
+                        (x - 1) * block_size,
+                        i * block_size,
+                        block_size,
+                        "Oak Leaf",
+                    )
+                )
+                objects.append(
+                    Block(
+                        block_images["Oak Leaves"],
+                        (x + 1) * block_size,
+                        i * block_size,
+                        block_size,
+                        "Oak Leaf",
                     )
                 )
     return objects
@@ -114,43 +140,22 @@ def right_click():
         return
     # placing block
     x, y = setpos((x, y))
-    if  inventory[selection].item.name == "Crafting Table":
-        blocks_loaded.append(
-        CraftingTable(
-            inventory[selection].item.image,
-            x,
-            y,
-            block_size,
-            )
-        )
-        blocks.append(
-            CraftingTable(
-                inventory[selection].item.image,
-                x,
-                y,
-                block_size,
-            )
-        )
-        return
-    inventory[selection].item.count -= 1
-    blocks_loaded.append(
-        Block(
-            inventory[selection].item.image,
-            x,
-            y,
-            block_size,
-            inventory[selection].item.name,
-        )
-    )
-    blocks.append(
-        Block(
-            inventory[selection].item.image,
-            x,
-            y,
-            block_size,
-            inventory[selection].item.name,
-        )
-    )
+    normal_args = [
+        inventory[selection].item.image,
+        x,
+        y,
+        block_size,
+    ]
+    # adding correct block type into block data
+    if inventory[selection].item.name == "Crafting Table":
+        blocks_loaded.append(CraftingTable(*normal_args))
+        blocks.append(CraftingTable(*normal_args))
+    elif inventory[selection].item.name == "Chest":
+        blocks_loaded.append(Chest(*normal_args))
+        blocks.append(Chest(*normal_args))
+    else:
+        blocks_loaded.append(Block(*normal_args))
+        blocks.append(Block(*normal_args))
     inventory[selection].item.count -= 1
 
 def interact(obj):
@@ -160,6 +165,11 @@ def interact(obj):
         inv_view = True
         external_inventory_type = "Crafting"
         result_inventory = obj.result_inventory
+    if obj.name == "Chest":
+        external_inventory = obj.inventory
+        inv_view = True
+        external_inventory_type = "Chest"
+        result_inventory = obj.result_inventory
 
 
 def display():
@@ -167,7 +177,16 @@ def display():
     for obj in blocks_loaded:
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
-    render_ui(window, inventory, held, external_inventory, result_inventory, inv_view, inv_view, selection)
+    render_ui(
+        window,
+        inventory,
+        held,
+        external_inventory,
+        result_inventory,
+        inv_view,
+        inv_view,
+        selection,
+    )
     pygame.display.update()
 
 
@@ -175,7 +194,7 @@ if __name__ == "__main__":
     blocks = generate_world()
     blocks_loaded = []
     player = Player(player_img, 28, 56)
-    y_offset = -2800
+    y_offset = -1500
     x_offset = 0
 
     # inventory creation
@@ -226,7 +245,14 @@ if __name__ == "__main__":
                         if selection >= 6:
                             selection = 0
                 else:
-                    manage_all_inventories(event, held, result_inventory, external_inventory_type, inventory, external_inventory)
+                    manage_all_inventories(
+                        event,
+                        held,
+                        result_inventory,
+                        external_inventory_type,
+                        inventory,
+                        external_inventory,
+                    )
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
