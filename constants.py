@@ -12,7 +12,7 @@ CLOCK = pygame.time.Clock()
 
 block_size = 32
 
-terrain_smoothness = 0.02
+terrain_smoothness = 0.03
 terrain_variation = 30
 
 stack_size = 64
@@ -20,7 +20,7 @@ slot_size = 48
 
 scroll_area = 100
 
-block_images = load_assets("assets\Blocks", (block_size, block_size))
+block_images = load_assets("assets\\Blocks", (block_size, block_size))
 
 player_img = pygame.transform.scale(
     pygame.image.load(os.path.join("assets", "player.jpeg")), (28, 56)

@@ -133,37 +133,55 @@ def manage_inventory(event, inventory, held,):
 
 def craft(external_inventory):
     recipe_components = []
-    for slot in external_inventory:
+    # recipe component index corredponding to recipe components
+    rci = []
+    for i, slot in enumerate(external_inventory):
         if slot.item is not None:
             recipe_components.append(slot.item.name)
+            rci.append(i)
+    if len(recipe_components) < 1:
+        return (None, None)
     if recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
-        return Item(block_images["Oak Planks"], "Oak Planks", 4)
+        return (Item(block_images["Oak Planks"], "Oak Planks", 4), recipe_components)
+    if recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
+        return (Item(block_images["Crafting Table"], "Crafting Table", 1), recipe_components)
+    if recipe_components == ["Stone", "Stone", "Stone", "Stone"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
+        return (Item(block_images["Stone Brick"], "Stone Brick", 4), recipe_components)
     else:
-        return None
+        return (None, None)
 
 
 def manage_all_inventories(event, held, result_inventory, external_inventory_type, inventory, external_inventory):
+    # allows manegment of inventories
     manage_inventory(event, inventory, held)
     if external_inventory is not None:
         manage_inventory(event, external_inventory, held)
     x, y = pygame.mouse.get_pos()
     if external_inventory_type == "Crafting":
+        result_inventory[0].item, items_used = craft(external_inventory)
         if result_inventory[0].rect.collidepoint((x, y)):
-            item = craft(external_inventory)
-            if item is None:
+            if result_inventory[0].item is None:
                 return
+            # removes used items
+            for item_used in items_used:
+                for slot in external_inventory:
+                    if slot.item is None:
+                        continue
+                    if slot.item.name == item_used:
+                        slot.item.count -= 1
+                        break
             if event.button == 1:
                 if held.item is None:
-                    held.item = item
-                elif item is not None:
-                    if held.item.name == item.name:
-                        held.item.count += item.count
+                    held.item = result_inventory[0].item
+                elif result_inventory[0].item is not None:
+                    if held.item.name == result_inventory[0].item.name:
+                        held.item.count += result_inventory[0].item.count
             elif event.button == 3:
-                slot_index = find_slot(item.name, inventory)
-                if inventory[slot_index].item is not None and item is not None:
-                    inventory[slot_index].item.count += item.count
+                slot_index = find_slot(result_inventory[0].item.name, inventory)
+                if inventory[slot_index].item is not None and result_inventory[0].item is not None:
+                    inventory[slot_index].item.count += result_inventory[0].item.count
                 if inventory[slot_index].item is None:
-                    inventory[slot_index].item = item 
+                    inventory[slot_index].item = result_inventory[0].item 
                 result_inventory[1].item = None
     
     

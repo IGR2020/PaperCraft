@@ -1,0 +1,41 @@
+__2dminecraft-V-0.1__
+    semi survival
+    platformer
+    2d collision
+    5 blocks
+    chunk rendering
+    random world generation
+    build system
+    scrollbar
+
+__2dminecraft-V-0.2__
+    + changeable inventory
+    + full inventory
+    + limited stack sizes
+    + stack splitting
+
+__2dminecraft-V-0.3__
+    + optimisations
+    + bug fixes
+    + crafting
+    + 1 crafting recipe
+    + inventory ease of use
+    + 2 blocks
+
+__2dminecraft-V-0.4__
+    + 1 crafting recipe
+    + new terrain generation
+    + new ui rendering scheme
+    # slot generation happens left to right then bottom to up,
+    # example: [7] [8] [9]
+    #          [4] [5] [6]
+    #          [1] [2] [3]
+    + new inventory manegment system
+    - crafting temporarily suspended
+
+__2dminecraft-V-0.5__
+    + new assets
+    + new crafting system
+    : 3 crafting recipies
+
+    

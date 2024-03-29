@@ -49,20 +49,20 @@ def generate_world():
         if randint(1, 20) == 1:
             for i in range(current_height - 5, current_height - 2):
                 objects.append(
-                    Block(block_images["Oak Wood"], x * block_size, i * block_size, block_size, "Wood")
+                    Block(block_images["Oak Wood"], x * block_size, i * block_size, block_size, "Oak Wood")
                 )
             for i in range(current_height - 8, current_height - 5):
                 objects.append(
-                    Block(block_images["Oak Leaves"], x * block_size, i * block_size, block_size, "Leaf")
+                    Block(block_images["Oak Leaves"], x * block_size, i * block_size, block_size, "Oak Leaf")
                 )
                 objects.append(
                     Block(
-                        block_images["Oak Leaves"], (x - 1) * block_size, i * block_size, block_size, "Leaf"
+                        block_images["Oak Leaves"], (x - 1) * block_size, i * block_size, block_size, "Oak Leaf"
                     )
                 )
                 objects.append(
                     Block(
-                        block_images["Oak Leaves"], (x + 1) * block_size, i * block_size, block_size, "Leaf"
+                        block_images["Oak Leaves"], (x + 1) * block_size, i * block_size, block_size, "Oak Leaf"
                     )
                 )
     return objects
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     blocks = generate_world()
     blocks_loaded = []
     player = Player(player_img, 28, 56)
-    y_offset = 0
+    y_offset = -2800
     x_offset = 0
 
     # inventory creation
