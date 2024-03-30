@@ -40,10 +40,10 @@ class Player(pygame.sprite.Sprite):
         self.x_vel = 0
 
     def move_left(self):
-        self.x_vel += 4
+        self.x_vel += 8
 
     def move_right(self):
-        self.x_vel -= 4
+        self.x_vel -= 8
 
     def jump(self):
         if self.jump_count == 0:

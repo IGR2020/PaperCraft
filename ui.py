@@ -3,6 +3,7 @@ from objects import Item
 from pygame_tools import blit_text
 from constants import block_size, block_images
 
+
 # finds available or matching slots for an item
 def find_slot(item_name, inventory, max_stack_count=64):
     for i, button in enumerate(inventory):
@@ -36,11 +37,13 @@ def maintain_slots(inventory, max_stack_size=64):
         if inventory[index].item is not None:
             inventory[index].item.count += overflow
         if inventory[index].item is None:
-            button.item = Item(button.item.image, button.item.name, overflow)
+            button.item = Item(button.item.name, overflow)
     return
 
 
-def maintain_inventory(inventory, held, external_inventory, result_inventory, max_stack_size=64):
+def maintain_inventory(
+    inventory, held, external_inventory, result_inventory, max_stack_size=64
+):
     maintain_slots(inventory, max_stack_size)
     maintain_slots([held], max_stack_size)
     if external_inventory is not None:
@@ -91,12 +94,16 @@ def render_ui(
     if held.item is not None:
         x, y = pygame.mouse.get_pos()
         pos = (x - block_size / 2, y - block_size / 2)
-        window.blit(held.item.image, pos)
+        window.blit(block_images[held.item.name], pos)
         blit_text(window, str(held.item.count), pos=pos, size=20)
 
 
 # inventory manegment
-def manage_inventory(event, inventory, held,):
+def manage_inventory(
+    event,
+    inventory,
+    held,
+):
     x, y = pygame.mouse.get_pos()
 
     # finding slot
@@ -117,11 +124,11 @@ def manage_inventory(event, inventory, held,):
                 if held.item is None and slot.item is None:
                     return
                 elif held.item is None and slot.item is not None:
-                    held.item = Item(slot.item.image, slot.item.name, 0)
+                    held.item = Item(slot.item.name, 0)
                     held.item.count += slot.item.count // 2
                     slot.item.count -= slot.item.count // 2
                 elif held.item is not None and slot.item is None:
-                    slot.item = Item(held.item.image, held.item.name, 0)
+                    slot.item = Item(held.item.name, 0)
                     held.item.count -= 1
                     slot.item.count += 1
                 elif held.item.name == slot.item.name:
@@ -130,6 +137,7 @@ def manage_inventory(event, inventory, held,):
                 else:
                     held.item, slot.item = slot.item, held.item
                 return
+
 
 def craft(external_inventory):
     recipe_components = []
@@ -142,18 +150,36 @@ def craft(external_inventory):
     if len(recipe_components) < 1:
         return (None, None)
     elif recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
-        return (Item(block_images["Oak Planks"], "Oak Planks", 4), recipe_components)
-    elif recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
-        return (Item(block_images["Crafting Table"], "Crafting Table", 1), recipe_components)
-    elif recipe_components == ["Stone", "Stone", "Stone", "Stone"] and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]:
-        return (Item(block_images["Stone Brick"], "Stone Brick", 4), recipe_components)
-    elif len(recipe_components) == 8 and rci == [0, 1, 2, 3, 5, 6, 7, 8]:
-        return (Item(block_images["Chest"], "Chest", 1), recipe_components)
+        return (Item("Oak Planks", 4), recipe_components)
+    elif (
+        recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"]
+        and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
+    ):
+        return (Item("Crafting Table", 1), recipe_components)
+    elif (
+        recipe_components == ["Stone", "Stone", "Stone", "Stone"]
+        and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
+    ):
+        return (Item("Stone Brick", 4), recipe_components)
+    elif (
+        len(recipe_components) == 8
+        and rci == [0, 1, 2, 3, 5, 6, 7, 8]
+        and "Oak Planks" in recipe_components
+        and len(set(recipe_components)) == 1
+    ):
+        return (Item("Chest", 1), recipe_components)
     else:
         return (None, None)
 
 
-def manage_all_inventories(event, held, result_inventory, external_inventory_type, inventory, external_inventory):
+def manage_all_inventories(
+    event,
+    held,
+    result_inventory,
+    external_inventory_type,
+    inventory,
+    external_inventory,
+):
     # allows manegment of inventories
     manage_inventory(event, inventory, held)
     if external_inventory is not None:
@@ -181,12 +207,13 @@ def manage_all_inventories(event, held, result_inventory, external_inventory_typ
                         held.item.count += result_inventory[0].item.count
             elif event.button == 3:
                 slot_index = find_slot(result_inventory[0].item.name, inventory)
-                if inventory[slot_index].item is not None and result_inventory[0].item is not None:
+                if (
+                    inventory[slot_index].item is not None
+                    and result_inventory[0].item is not None
+                ):
                     inventory[slot_index].item.count += result_inventory[0].item.count
                 if inventory[slot_index].item is None:
-                    inventory[slot_index].item = result_inventory[0].item 
+                    inventory[slot_index].item = result_inventory[0].item
                 result_inventory[1].item = None
     elif external_inventory_type == "Chest":
         return
-    
-    

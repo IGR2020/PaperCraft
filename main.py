@@ -2,32 +2,34 @@ from random import randint
 
 import pygame
 
-from pygame_tools import blit_text, Button
-
 from player import Player
 from objects import Block, Item, Slot, CraftingTable, Chest
 
 from perlin_noise import PerlinNoise
 from constants import *
 
+from world import load_blocks, save_blocks, read_endpoints, write_endpoints
+
+from os import listdir
+from os.path import join
+
 from ui import (
     render_ui,
     find_slot,
-    manage_inventory,
     maintain_inventory,
     manage_all_inventories,
 )
 
-
-def generate_world():
+def generate_world(
+    starting_x=-WIDTH * 2 // block_size, ending_x=WIDTH * 2 // block_size
+):
     objects = []
     noise = PerlinNoise()
-    for x in range(-WIDTH * 8 // block_size, WIDTH * 8 // block_size):
+    for x in range(starting_x, ending_x):
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
         for y in range(current_height, 30):
             objects.append(
                 Block(
-                    block_images["Stone"],
                     x * block_size,
                     y * block_size,
                     block_size,
@@ -36,16 +38,14 @@ def generate_world():
             )
         objects.append(
             Block(
-                block_images["Dirt"],
                 x * block_size,
                 (current_height - 1) * block_size,
                 block_size,
                 "Dirt",
-            )
+            ) 
         )
         objects.append(
             Block(
-                block_images["Grass"],
                 x * block_size,
                 (current_height - 2) * block_size,
                 block_size,
@@ -56,7 +56,6 @@ def generate_world():
             for i in range(current_height - 5, current_height - 2):
                 objects.append(
                     Block(
-                        block_images["Oak Wood"],
                         x * block_size,
                         i * block_size,
                         block_size,
@@ -66,35 +65,31 @@ def generate_world():
             for i in range(current_height - 8, current_height - 5):
                 objects.append(
                     Block(
-                        block_images["Oak Leaves"],
                         x * block_size,
                         i * block_size,
                         block_size,
-                        "Oak Leaf",
+                        "Oak Leaves",
                     )
                 )
                 objects.append(
                     Block(
-                        block_images["Oak Leaves"],
                         (x - 1) * block_size,
                         i * block_size,
                         block_size,
-                        "Oak Leaf",
+                        "Oak Leaves",
                     )
                 )
                 objects.append(
                     Block(
-                        block_images["Oak Leaves"],
                         (x + 1) * block_size,
                         i * block_size,
                         block_size,
-                        "Oak Leaf",
+                        "Oak Leaves",
                     )
                 )
     return objects
 
 
-# noinspection PyShadowingNames
 def setpos(pos):
     x, y = pos
     x -= x % block_size
@@ -107,20 +102,16 @@ def delete_block():
     x, y = pygame.mouse.get_pos()
     x += x_offset
     y += y_offset
-    for obj in blocks_loaded:
+    for obj in blocks:
         if obj.rect.collidepoint((x, y)):
             slot = find_slot(obj.name, inventory)
             if slot is None:
                 return
             if inventory[slot].item is None:
-                inventory[slot].item = Item(obj.img, obj.name, 1)
+                inventory[slot].item = Item(obj.name, 1)
             else:
                 inventory[slot].item.count += 1
-            blocks_loaded.remove(obj)
-    for item in blocks:
-        if item.rect.collidepoint((x, y)):
-            blocks.remove(item)
-            return
+            blocks.remove(obj)
 
 
 # activated opon request to place block
@@ -129,7 +120,7 @@ def right_click():
     x += x_offset
     y += y_offset
     # check for interation
-    for obj in blocks_loaded:
+    for obj in blocks:
         if obj.rect.collidepoint((x, y)):
             interact(obj)
             return
@@ -141,22 +132,20 @@ def right_click():
     # placing block
     x, y = setpos((x, y))
     normal_args = [
-        inventory[selection].item.image,
         x,
         y,
         block_size,
+        inventory[selection].item.name,
     ]
     # adding correct block type into block data
     if inventory[selection].item.name == "Crafting Table":
-        blocks_loaded.append(CraftingTable(*normal_args))
         blocks.append(CraftingTable(*normal_args))
     elif inventory[selection].item.name == "Chest":
-        blocks_loaded.append(Chest(*normal_args))
         blocks.append(Chest(*normal_args))
     else:
-        blocks_loaded.append(Block(*normal_args))
         blocks.append(Block(*normal_args))
     inventory[selection].item.count -= 1
+
 
 def interact(obj):
     global external_inventory, inv_view, external_inventory_type, result_inventory
@@ -174,7 +163,7 @@ def interact(obj):
 
 def display():
     window.fill((150, 150, 255))
-    for obj in blocks_loaded:
+    for obj in blocks:
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
     render_ui(
@@ -191,8 +180,10 @@ def display():
 
 
 if __name__ == "__main__":
-    blocks = generate_world()
-    blocks_loaded = []
+    # reading and writing endpoints
+    start_point, end_point = read_endpoints("world_data\\endpoints.txt")
+    current_chunck_start_point, current_chunck_end_point = start_point, end_point
+    blocks = load_blocks("world_data\(-57, 56).pkl")
     player = Player(player_img, 28, 56)
     y_offset = -1500
     x_offset = 0
@@ -208,16 +199,14 @@ if __name__ == "__main__":
     result_inventory = None
 
     # temporary testing
-    inventory[0].item = Item(block_images["Crafting Table"], "Crafting Table", 10)
+    inventory[0].item = Item("Crafting Table", 10)
+    inventory[1].item = Item("Oak Wood", 64)
+    inventory[2].item = Item("Oak Wood", 64)
+    inventory[3].item = Item("Oak Wood", 64)
+    inventory[4].item = Item("Oak Wood", 64)
 
     selection = 0
     inv_view = False
-    for block in blocks:
-        if (
-            0 - block_size < block.rect.x - x_offset < WIDTH + block_size
-            and 0 - block_size < block.rect.y - y_offset < HEIGHT + block_size
-        ):
-            blocks_loaded.append(block)
 
     while RUN:
         CLOCK.tick(FPS)
@@ -230,7 +219,7 @@ if __name__ == "__main__":
                 if not inv_view:
                     if event.button == 1:
                         delete_block()
-                    if event.button == 3:
+                    if event.button == 3  :
                         right_click()
                     if event.button == 4:
                         selection += 1
@@ -267,41 +256,52 @@ if __name__ == "__main__":
             player.move_left()
         if keys[pygame.K_a]:
             player.move_right()
+        if keys[pygame.K_F3]:
+            print(CLOCK.get_fps())
 
         if (
             player.rect.right - x_offset >= WIDTH - scroll_area and player.x_vel > 0
         ) or (player.rect.left - x_offset <= scroll_area and player.x_vel < 0):
             x_offset += player.x_vel
-            blocks_loaded = []
-            for block in blocks:
-                if (
-                    0 - block_size * 3
-                    < block.rect.x - x_offset
-                    < WIDTH + block_size * 3
-                    and 0 - block_size * 3
-                    < block.rect.y - y_offset
-                    < HEIGHT + block_size * 3
-                ):
-                    blocks_loaded.append(block)
 
         if (
             player.rect.bottom - y_offset >= HEIGHT - scroll_area and player.y_vel > 0
         ) or (player.rect.top - y_offset <= scroll_area and player.y_vel < 0):
             y_offset += player.y_vel
-            blocks_loaded = []
-            for block in blocks:
-                if (
-                    0 - block_size * 3
-                    < block.rect.x - x_offset
-                    < WIDTH + block_size * 3
-                    and 0 - block_size * 3
-                    < block.rect.y - y_offset
-                    < HEIGHT + block_size * 3
-                ):
-                    blocks_loaded.append(block)
+
+        # checks if a new chunk has to be generated
+        if player.rect.x // block_size < start_point:
+            write_endpoints("world_data\\endpoints.txt", start_point, end_point)
+            save_blocks(blocks, f"world_data\\({current_chunck_start_point}, {current_chunck_end_point}).pkl")
+            for file in listdir("world_data"):
+                if file == f"({current_chunck_start_point-chunck_size}, {current_chunck_start_point}).pkl":
+                    blocks = load_blocks(join("world_data", file))
+                    current_chunck_end_point = current_chunck_start_point
+                    current_chunck_start_point -= chunck_size
+                    break
+            else:
+                current_chunck_end_point = start_point
+                start_point -= chunck_size
+                current_chunck_start_point = start_point 
+                blocks = generate_world(current_chunck_start_point, current_chunck_end_point)
+
+        if player.rect.x // block_size > end_point:
+            write_endpoints("world_data\\endpoints.txt", start_point, end_point)
+            save_blocks(blocks, f"world_data\\({current_chunck_start_point}, {current_chunck_end_point}).pkl")
+            for file in listdir("world_data"):
+                if file == f"({current_chunck_end_point}, {current_chunck_end_point + chunck_size}).pkl":
+                    blocks = load_blocks(join("world_data", file))
+                    current_chunck_start_point = current_chunck_end_point
+                    current_chunck_end_point += chunck_size
+                    break
+            else:
+                current_chunck_start_point = end_point
+                end_point += chunck_size
+                current_chunck_end_point = end_point 
+                blocks = generate_world(current_chunck_start_point, current_chunck_end_point)
 
         maintain_inventory(inventory, held, external_inventory, result_inventory)
-        player.loop(blocks_loaded)
+        player.loop(blocks)
         display()
 
     pygame.quit()

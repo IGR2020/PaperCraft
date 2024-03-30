@@ -20,11 +20,14 @@ slot_size = 48
 
 scroll_area = 100
 
+chunck_size = 112
+
 block_images = load_assets("assets\\Blocks", (block_size, block_size))
 
 player_img = pygame.transform.scale(
     pygame.image.load(os.path.join("assets", "player.jpeg")), (28, 56)
 )
+
 inv_slot_img = pygame.transform.scale(
     pygame.image.load(os.path.join("assets", "slot.jpeg")), (slot_size, slot_size)
 )

@@ -39,3 +39,7 @@ __2dminecraft-V-0.5__
     : 4 crafting recipies
     + trees now spawn 1 in 7 (previous 1 in 20) 
     + chests
+    # world x range is -57 to 55 including endpoints (112 blocks)
+
+__2dminecraft-V-0.6__
+    + refrence based rendering
