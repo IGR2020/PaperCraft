@@ -12,6 +12,8 @@ from world import load_data, save_data, read_pair, write_pair
 
 from os.path import join, isfile
 
+from math import floor, ceil
+
 from ui import (
     render_ui,
     find_slot,
@@ -22,8 +24,8 @@ from ui import (
 def generate_world(
     starting_x=-WIDTH * 2 // block_size, ending_x=WIDTH * 2 // block_size
 ):
+    global noise
     objects = []
-    noise = PerlinNoise()
     for x in range(starting_x, ending_x):
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
         for y in range(current_height, 30):
@@ -179,14 +181,25 @@ def display():
 
 
 if __name__ == "__main__":
+    # getting noise
+    if isfile("world data\\world1\\noise.pkl"):
+        noise = load_data("world data\\world1\\noise.pkl")
+    else:
+        noise = PerlinNoise()
+
     # checking if a world exists and reading from it
-    if isfile("world data\\world1\\-57 56.pkl"):
-        blocks = load_data("world data\\world1\\-57 56.pkl")
+    if isfile("world data\\world1\\0.pkl"):
+        blocks = load_data("world data\\world1\\0.pkl")
     else:
         blocks = generate_world()
-    chunck_start, chunk_end = -57, 56
-    player = load_data("world data\\world1\\player data.pkl")
+    if isfile("world data\\world1\\player data.pkl"):
+        player = load_data("world data\\world1\\player data.pkl")
+    else:
+        player = Player(28, 56)
     x_offset, y_offset = read_pair("world data\\world1\\offsets.txt")
+    block_x = 0
+    current_chunk = 0
+    chunck_changed = False
 
     # inventory creation
     inventory = []
@@ -207,8 +220,9 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 # saving all data
-                save_data(blocks, join("world data", "world1", f"{chunck_start} {chunk_end}.pkl"))
+                save_data(blocks, join("world data", "world1", f"{current_chunk}.pkl"))
                 save_data(player, join("world data", "world1", "player data.pkl"))
+                save_data(noise, join("world data", "world1", "noise.pkl"))
                 write_pair("world data\\world1\\offsets.txt", round(x_offset), round(y_offset))
                 RUN = False
 
@@ -247,25 +261,54 @@ if __name__ == "__main__":
                     external_inventory = None
                     result_inventory = None
                     external_inventory_type = None
+                if event.key == pygame.K_F3:
+                    print("Current fps = ", CLOCK.get_fps())
+                    print("Current x = ", block_x)
+                    print("Current chunk x = ", current_chunk)
+                    print("Current y = ", player.rect.y)
+                    
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
             player.move_left()
         if keys[pygame.K_a]:
             player.move_right()
-        if keys[pygame.K_F3]:
-            print("Current fps = ", CLOCK.get_fps())
 
         if (
             player.rect.right - x_offset >= WIDTH - scroll_area and player.x_vel > 0
         ) or (player.rect.left - x_offset <= scroll_area and player.x_vel < 0):
             x_offset += player.x_vel
+            block_x = player.rect.x // block_size
+            temp = current_chunk
+            if block_x < 0:
+                current_chunk = ceil((block_x - 56) / 113)
+            elif block_x > 0:
+                current_chunk = floor((block_x + 57) / 113)
+            else:
+                current_chunk = 0
+            chunck_changed = temp != chunck_changed
+
 
         if (
             player.rect.bottom - y_offset >= HEIGHT - scroll_area and player.y_vel > 0
         ) or (player.rect.top - y_offset <= scroll_area and player.y_vel < 0):
             y_offset += player.y_vel
 
+        if chunck_changed:
+            # saving all data
+            save_data(blocks, join("world data", "world1", f"{temp}.pkl"))
+            save_data(player, join("world data", "world1", "player data.pkl"))
+            save_data(noise, join("world data", "world1", "noise.pkl"))
+            write_pair("world data\\world1\\offsets.txt", round(x_offset), round(y_offset))
+            if isfile(f"world data\\world1\\{current_chunk}.pkl"):
+                blocks = load_data(f"world data\\world1\\{current_chunk}.pkl")
+            else:
+                if current_chunk < 0:
+                    blocks = generate_world(current_chunk*113+56-113, current_chunk*113+56)
+                if current_chunk > 0:
+                    blocks = generate_world(current_chunk*113-57, current_chunk*113-57+113)
+                else:
+                    blocks = generate_world()
         # checks if a new chunk has to be generated
         
 
