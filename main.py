@@ -8,10 +8,9 @@ from objects import Block, Item, Slot, CraftingTable, Chest
 from perlin_noise import PerlinNoise
 from constants import *
 
-from world import load_blocks, save_blocks, read_endpoints, write_endpoints
+from world import load_data, save_data, read_pair, write_pair
 
-from os import listdir
-from os.path import join
+from os.path import join, isfile
 
 from ui import (
     render_ui,
@@ -180,13 +179,14 @@ def display():
 
 
 if __name__ == "__main__":
-    # reading and writing endpoints
-    start_point, end_point = read_endpoints("world_data\\endpoints.txt")
-    current_chunck_start_point, current_chunck_end_point = start_point, end_point
-    blocks = load_blocks("world_data\(-57, 56).pkl")
-    player = Player(player_img, 28, 56)
-    y_offset = -1500
-    x_offset = 0
+    # checking if a world exists and reading from it
+    if isfile("world data\\world1\\-57 56.pkl"):
+        blocks = load_data("world data\\world1\\-57 56.pkl")
+    else:
+        blocks = generate_world()
+    chunck_start, chunk_end = -57, 56
+    player = load_data("world data\\world1\\player data.pkl")
+    x_offset, y_offset = read_pair("world data\\world1\\offsets.txt")
 
     # inventory creation
     inventory = []
@@ -198,13 +198,6 @@ if __name__ == "__main__":
     external_inventory_type = None
     result_inventory = None
 
-    # temporary testing
-    inventory[0].item = Item("Crafting Table", 10)
-    inventory[1].item = Item("Oak Wood", 64)
-    inventory[2].item = Item("Oak Wood", 64)
-    inventory[3].item = Item("Oak Wood", 64)
-    inventory[4].item = Item("Oak Wood", 64)
-
     selection = 0
     inv_view = False
 
@@ -213,6 +206,10 @@ if __name__ == "__main__":
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # saving all data
+                save_data(blocks, join("world data", "world1", f"{chunck_start} {chunk_end}.pkl"))
+                save_data(player, join("world data", "world1", "player data.pkl"))
+                write_pair("world data\\world1\\offsets.txt", round(x_offset), round(y_offset))
                 RUN = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -257,7 +254,7 @@ if __name__ == "__main__":
         if keys[pygame.K_a]:
             player.move_right()
         if keys[pygame.K_F3]:
-            print(CLOCK.get_fps())
+            print("Current fps = ", CLOCK.get_fps())
 
         if (
             player.rect.right - x_offset >= WIDTH - scroll_area and player.x_vel > 0
@@ -270,35 +267,7 @@ if __name__ == "__main__":
             y_offset += player.y_vel
 
         # checks if a new chunk has to be generated
-        if player.rect.x // block_size < start_point:
-            write_endpoints("world_data\\endpoints.txt", start_point, end_point)
-            save_blocks(blocks, f"world_data\\({current_chunck_start_point}, {current_chunck_end_point}).pkl")
-            for file in listdir("world_data"):
-                if file == f"({current_chunck_start_point-chunck_size}, {current_chunck_start_point}).pkl":
-                    blocks = load_blocks(join("world_data", file))
-                    current_chunck_end_point = current_chunck_start_point
-                    current_chunck_start_point -= chunck_size
-                    break
-            else:
-                current_chunck_end_point = start_point
-                start_point -= chunck_size
-                current_chunck_start_point = start_point 
-                blocks = generate_world(current_chunck_start_point, current_chunck_end_point)
-
-        if player.rect.x // block_size > end_point:
-            write_endpoints("world_data\\endpoints.txt", start_point, end_point)
-            save_blocks(blocks, f"world_data\\({current_chunck_start_point}, {current_chunck_end_point}).pkl")
-            for file in listdir("world_data"):
-                if file == f"({current_chunck_end_point}, {current_chunck_end_point + chunck_size}).pkl":
-                    blocks = load_blocks(join("world_data", file))
-                    current_chunck_start_point = current_chunck_end_point
-                    current_chunck_end_point += chunck_size
-                    break
-            else:
-                current_chunck_start_point = end_point
-                end_point += chunck_size
-                current_chunck_end_point = end_point 
-                blocks = generate_world(current_chunck_start_point, current_chunck_end_point)
+        
 
         maintain_inventory(inventory, held, external_inventory, result_inventory)
         player.loop(blocks)

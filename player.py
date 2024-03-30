@@ -1,18 +1,18 @@
 import pygame
+from constants import player_img
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, image, width, height):
+    def __init__(self, width, height):
         super().__init__()
         self.rect = pygame.Rect(450, -1500, width, height)
-        self.img = image
         self.y_vel = 0
         self.x_vel = 0
         self.fall_speed = 0.2
         self.jump_count = 0
 
     def render(self, screen, x_offset, y_offset):
-        screen.blit(self.img, (self.rect.x - x_offset, self.rect.y - y_offset))
+        screen.blit(player_img, (self.rect.x - x_offset, self.rect.y - y_offset))
 
     def loop(self, objects):
         self.y_vel += self.fall_speed
