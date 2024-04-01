@@ -44,3 +44,4 @@ __2dminecraft-V-0.5__
 __2dminecraft-V-0.6__
     + refrence based rendering
     + saving and loading world data
+    + chunk generation

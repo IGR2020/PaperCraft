@@ -21,9 +21,7 @@ from ui import (
     manage_all_inventories,
 )
 
-def generate_world(
-    starting_x=-WIDTH * 2 // block_size, ending_x=WIDTH * 2 // block_size
-):
+def generate_world(starting_x, ending_x):
     global noise
     objects = []
     for x in range(starting_x, ending_x):
@@ -191,15 +189,15 @@ if __name__ == "__main__":
     if isfile("world data\\world1\\0.pkl"):
         blocks = load_data("world data\\world1\\0.pkl")
     else:
-        blocks = generate_world()
+        blocks = generate_world(0, 100)
     if isfile("world data\\world1\\player data.pkl"):
         player = load_data("world data\\world1\\player data.pkl")
     else:
         player = Player(28, 56)
     x_offset, y_offset = read_pair("world data\\world1\\offsets.txt")
-    block_x = 0
     current_chunk = 0
     chunck_changed = False
+    closest_chunk = -1
 
     # inventory creation
     inventory = []
@@ -216,6 +214,16 @@ if __name__ == "__main__":
 
     while RUN:
         CLOCK.tick(FPS)
+
+        # getting chunk data
+        prev_chunk = current_chunk
+        precise_chunk = (player.rect.x // block_size)/chunck_size
+        current_chunk = floor(precise_chunk)
+        prev_closest_chunk = closest_chunk
+        if round(precise_chunk) == current_chunk:
+            closest_chunk = current_chunk - 1 
+        else:
+            closest_chunk = current_chunk + 1
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -253,19 +261,25 @@ if __name__ == "__main__":
                         inventory,
                         external_inventory,
                     )
+
             if event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_SPACE:
                     player.jump()
+
                 if event.key == pygame.K_e:
                     inv_view = not inv_view
                     external_inventory = None
                     result_inventory = None
                     external_inventory_type = None
+
                 if event.key == pygame.K_F3:
                     print("Current fps = ", CLOCK.get_fps())
-                    print("Current x = ", block_x)
                     print("Current chunk x = ", current_chunk)
+                    print("Previous chunk x = ", prev_chunk)
                     print("Current y = ", player.rect.y)
+                    print("Chunk change = ", chunck_changed)
+                    print("Formula = ", (player.rect.x // block_size), "\n")
                     
 
         keys = pygame.key.get_pressed()
@@ -278,15 +292,6 @@ if __name__ == "__main__":
             player.rect.right - x_offset >= WIDTH - scroll_area and player.x_vel > 0
         ) or (player.rect.left - x_offset <= scroll_area and player.x_vel < 0):
             x_offset += player.x_vel
-            block_x = player.rect.x // block_size
-            temp = current_chunk
-            if block_x < 0:
-                current_chunk = ceil((block_x - 56) / 113)
-            elif block_x > 0:
-                current_chunk = floor((block_x + 57) / 113)
-            else:
-                current_chunk = 0
-            chunck_changed = temp != chunck_changed
 
 
         if (
@@ -294,24 +299,16 @@ if __name__ == "__main__":
         ) or (player.rect.top - y_offset <= scroll_area and player.y_vel < 0):
             y_offset += player.y_vel
 
-        if chunck_changed:
+        if prev_chunk != current_chunk:
             # saving all data
-            save_data(blocks, join("world data", "world1", f"{temp}.pkl"))
+            save_data(blocks, join("world data", "world1", f"{prev_chunk}.pkl"))
             save_data(player, join("world data", "world1", "player data.pkl"))
             save_data(noise, join("world data", "world1", "noise.pkl"))
             write_pair("world data\\world1\\offsets.txt", round(x_offset), round(y_offset))
             if isfile(f"world data\\world1\\{current_chunk}.pkl"):
                 blocks = load_data(f"world data\\world1\\{current_chunk}.pkl")
             else:
-                if current_chunk < 0:
-                    blocks = generate_world(current_chunk*113+56-113, current_chunk*113+56)
-                if current_chunk > 0:
-                    blocks = generate_world(current_chunk*113-57, current_chunk*113-57+113)
-                else:
-                    blocks = generate_world()
-        # checks if a new chunk has to be generated
-        
-
+                blocks = generate_world(current_chunk*chunck_size, current_chunk*chunck_size+chunck_size)
         maintain_inventory(inventory, held, external_inventory, result_inventory)
         player.loop(blocks)
         display()

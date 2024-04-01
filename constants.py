@@ -20,7 +20,7 @@ slot_size = 48
 
 scroll_area = 100
 
-chunck_size = 112
+chunck_size = 128
 
 block_images = load_assets("assets\\Blocks", (block_size, block_size))
 
