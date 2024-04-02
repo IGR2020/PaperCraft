@@ -1,3 +1,9 @@
++ = added feature
+- = removed feature
+# = note
+: = re-enstating feature
+$ = failed feature
+
 __2dminecraft-V-0.1__
     semi survival
     platformer
@@ -40,9 +46,13 @@ __2dminecraft-V-0.5__
     + trees now spawn 1 in 7 (previous 1 in 20) 
     + chests
     # world x range is -57 to 55 including endpoints (112 blocks)
+    $ atempted world generation
 
 __2dminecraft-V-0.6__
     + refrence based rendering
     + saving and loading world data
     + chunk generation
     + dual chunk loading
+    + inventory saving
+    + cave generation
+    + bedrock

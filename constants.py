@@ -14,13 +14,18 @@ block_size = 32
 
 terrain_smoothness = 0.03
 terrain_variation = 30
+cave_size = 24
+cave_variation = 0.2
 
 stack_size = 64
 slot_size = 48
 
 scroll_area = 100
 
-chunck_size = 128
+chunck_size = 64
+
+world_height = -64
+world_depth = 64
 
 block_images = load_assets("assets\\Blocks", (block_size, block_size))
 

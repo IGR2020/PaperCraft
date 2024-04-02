@@ -1,5 +1,6 @@
 import pygame
-from constants import player_img
+from constants import player_img, slot_size
+from objects import Slot
 
 
 class Player(pygame.sprite.Sprite):
@@ -10,6 +11,11 @@ class Player(pygame.sprite.Sprite):
         self.x_vel = 0
         self.fall_speed = 0.2
         self.jump_count = 0
+        self.inventory = []
+        for j in range(9, 4, -1):
+            for i in range(6, 12):
+                self.inventory.append(Slot((i * slot_size, j * slot_size), None))
+        self.held = Slot((200, 200), None)
 
     def render(self, screen, x_offset, y_offset):
         screen.blit(player_img, (self.rect.x - x_offset, self.rect.y - y_offset))

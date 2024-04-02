@@ -3,7 +3,7 @@ from random import randint
 import pygame
 
 from player import Player
-from objects import Block, Item, Slot, CraftingTable, Chest
+from objects import Block, Item, CraftingTable, Chest
 
 from perlin_noise import PerlinNoise
 from constants import *
@@ -26,15 +26,24 @@ def generate_world(starting_x, ending_x):
     objects = []
     for x in range(starting_x, ending_x):
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
-        for y in range(current_height, 30):
-            objects.append(
-                Block(
-                    x * block_size,
-                    y * block_size,
-                    block_size,
-                    "Stone",
+        for y in range(current_height, 64):
+            if noise((x*cave_variation, y*cave_variation)) * cave_size < 0.5:
+                objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Stone",
+                    )
                 )
-            )
+        objects.append(
+                    Block(
+                        x * block_size,
+                        64 * block_size,
+                        block_size,
+                        "Bedrock",
+                    )
+                )
         objects.append(
             Block(
                 x * block_size,
@@ -103,23 +112,27 @@ def delete_block():
     y += y_offset
     for obj in chunk1:
         if obj.rect.collidepoint((x, y)):
-            slot = find_slot(obj.name, inventory)
+            if obj.name == "Bedrock":
+                return
+            slot = find_slot(obj.name, player.inventory)
             if slot is None:
                 return
-            if inventory[slot].item is None:
-                inventory[slot].item = Item(obj.name, 1)
+            if player.inventory[slot].item is None:
+                player.inventory[slot].item = Item(obj.name, 1)
             else:
-                inventory[slot].item.count += 1
+                player.inventory[slot].item.count += 1
             chunk1.remove(obj)
     for obj in chunk2:
         if obj.rect.collidepoint((x, y)):
-            slot = find_slot(obj.name, inventory)
+            if obj.name == "Bedrock":
+                return
+            slot = find_slot(obj.name, player.inventory)
             if slot is None:
                 return
-            if inventory[slot].item is None:
-                inventory[slot].item = Item(obj.name, 1)
+            if player.inventory[slot].item is None:
+                player.inventory[slot].item = Item(obj.name, 1)
             else:
-                inventory[slot].item.count += 1
+                player.inventory[slot].item.count += 1
             chunk2.remove(obj)
 
 
@@ -138,7 +151,7 @@ def right_click():
             interact(obj)
             return
     # checking for illegal placement
-    if inventory[selection].item is None:
+    if player.inventory[selection].item is None:
         return
     if player.rect.collidepoint((x, y)):
         return
@@ -148,26 +161,26 @@ def right_click():
         x,
         y,
         block_size,
-        inventory[selection].item.name,
+        player.inventory[selection].item.name,
     ]
     # placing block into correct chunk
     if floor((x//block_size)/chunck_size) != current_chunk:
         # adding correct block type into block data
-        if inventory[selection].item.name == "Crafting Table":
+        if player.inventory[selection].item.name == "Crafting Table":
             chunk2.append(CraftingTable(*normal_args))
-        elif inventory[selection].item.name == "Chest":
+        elif player.inventory[selection].item.name == "Chest":
             chunk2.append(Chest(*normal_args))
         else:
             chunk2.append(Block(*normal_args))
     else:
         # adding correct block type into block data
-        if inventory[selection].item.name == "Crafting Table":
+        if player.inventory[selection].item.name == "Crafting Table":
             chunk1.append(CraftingTable(*normal_args))
-        elif inventory[selection].item.name == "Chest":
+        elif player.inventory[selection].item.name == "Chest":
             chunk1.append(Chest(*normal_args))
         else:
             chunk1.append(Block(*normal_args))
-    inventory[selection].item.count -= 1
+    player.inventory[selection].item.count -= 1
 
 
 def interact(obj):
@@ -196,8 +209,8 @@ def display():
     player.render(window, x_offset, y_offset)
     render_ui(
         window,
-        inventory,
-        held,
+        player.inventory,
+        player.held,
         external_inventory,
         result_inventory,
         inv_view,
@@ -213,6 +226,7 @@ if __name__ == "__main__":
         noise = load_data("world data\\world1\\noise.pkl")
     else:
         noise = PerlinNoise()
+        save_data(noise, "world data\\world1\\noise.pkl")
 
     # getting the loaded chunks
     current_chunk, closest_chunk = read_pair("world data\\world1\\loaded chunks.txt")
@@ -230,17 +244,12 @@ if __name__ == "__main__":
         player = load_data("world data\\world1\\player data.pkl")
     else:
         player = Player(28, 56)
+        player.inventory[0].item = Item("Crafting Table")
     x_offset, y_offset = read_pair("world data\\world1\\offsets.txt")
     current_chunk = 0
     closest_chunk = -1
     swap = False
 
-    # inventory creation
-    inventory = []
-    for j in range(9, 4, -1):
-        for i in range(6, 12):
-            inventory.append(Slot((i * slot_size, j * slot_size), None))
-    held = Slot((200, 200), None)
     external_inventory = None
     external_inventory_type = None
     result_inventory = None
@@ -292,10 +301,10 @@ if __name__ == "__main__":
                 else:
                     manage_all_inventories(
                         event,
-                        held,
+                        player.held,
                         result_inventory,
                         external_inventory_type,
-                        inventory,
+                        player.inventory,
                         external_inventory,
                     )
 
@@ -352,7 +361,7 @@ if __name__ == "__main__":
             else:
                 chunk2 = generate_world(closest_chunk*chunck_size, closest_chunk*chunck_size+chunck_size)
 
-        maintain_inventory(inventory, held, external_inventory, result_inventory)
+        maintain_inventory(player.inventory, player.held, external_inventory, result_inventory)
         player.loop([*chunk1, *chunk2])
         display()
 
