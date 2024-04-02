@@ -101,7 +101,7 @@ def delete_block():
     x, y = pygame.mouse.get_pos()
     x += x_offset
     y += y_offset
-    for obj in blocks:
+    for obj in chunk1:
         if obj.rect.collidepoint((x, y)):
             slot = find_slot(obj.name, inventory)
             if slot is None:
@@ -110,7 +110,17 @@ def delete_block():
                 inventory[slot].item = Item(obj.name, 1)
             else:
                 inventory[slot].item.count += 1
-            blocks.remove(obj)
+            chunk1.remove(obj)
+    for obj in chunk2:
+        if obj.rect.collidepoint((x, y)):
+            slot = find_slot(obj.name, inventory)
+            if slot is None:
+                return
+            if inventory[slot].item is None:
+                inventory[slot].item = Item(obj.name, 1)
+            else:
+                inventory[slot].item.count += 1
+            chunk2.remove(obj)
 
 
 # activated opon request to place block
@@ -119,7 +129,11 @@ def right_click():
     x += x_offset
     y += y_offset
     # check for interation
-    for obj in blocks:
+    for obj in chunk1:
+        if obj.rect.collidepoint((x, y)):
+            interact(obj)
+            return
+    for obj in chunk2:
         if obj.rect.collidepoint((x, y)):
             interact(obj)
             return
@@ -136,13 +150,23 @@ def right_click():
         block_size,
         inventory[selection].item.name,
     ]
-    # adding correct block type into block data
-    if inventory[selection].item.name == "Crafting Table":
-        blocks.append(CraftingTable(*normal_args))
-    elif inventory[selection].item.name == "Chest":
-        blocks.append(Chest(*normal_args))
+    # placing block into correct chunk
+    if floor((x//block_size)/chunck_size) != current_chunk:
+        # adding correct block type into block data
+        if inventory[selection].item.name == "Crafting Table":
+            chunk2.append(CraftingTable(*normal_args))
+        elif inventory[selection].item.name == "Chest":
+            chunk2.append(Chest(*normal_args))
+        else:
+            chunk2.append(Block(*normal_args))
     else:
-        blocks.append(Block(*normal_args))
+        # adding correct block type into block data
+        if inventory[selection].item.name == "Crafting Table":
+            chunk1.append(CraftingTable(*normal_args))
+        elif inventory[selection].item.name == "Chest":
+            chunk1.append(Chest(*normal_args))
+        else:
+            chunk1.append(Block(*normal_args))
     inventory[selection].item.count -= 1
 
 
@@ -159,10 +183,15 @@ def interact(obj):
         external_inventory_type = "Chest"
         result_inventory = obj.result_inventory
 
+def save_chunk(chunk, chunk_data):
+    save_data(chunk_data, join("world data", "world1", f"{chunk}.pkl"))
+
 
 def display():
     window.fill((150, 150, 255))
-    for obj in blocks:
+    for obj in chunk1:
+        obj.render(window, x_offset, y_offset)
+    for obj in chunk2:
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
     render_ui(
@@ -185,19 +214,26 @@ if __name__ == "__main__":
     else:
         noise = PerlinNoise()
 
+    # getting the loaded chunks
+    current_chunk, closest_chunk = read_pair("world data\\world1\\loaded chunks.txt")
+
     # checking if a world exists and reading from it
-    if isfile("world data\\world1\\0.pkl"):
-        blocks = load_data("world data\\world1\\0.pkl")
+    if isfile(f"world data\\world1\\{current_chunk}.pkl"):
+        chunk1 = load_data(f"world data\\world1\\{current_chunk}.pkl")
     else:
-        blocks = generate_world(0, 100)
+        chunk1 = generate_world(0, chunck_size)
+    if isfile(f"world data\\world1\\{closest_chunk}.pkl"):
+        chunk2 = load_data(f"world data\\world1\\{closest_chunk}.pkl")
+    else:
+        chunk2 = generate_world(-chunck_size, 0)
     if isfile("world data\\world1\\player data.pkl"):
         player = load_data("world data\\world1\\player data.pkl")
     else:
         player = Player(28, 56)
     x_offset, y_offset = read_pair("world data\\world1\\offsets.txt")
     current_chunk = 0
-    chunck_changed = False
     closest_chunk = -1
+    swap = False
 
     # inventory creation
     inventory = []
@@ -228,10 +264,11 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 # saving all data
-                save_data(blocks, join("world data", "world1", f"{current_chunk}.pkl"))
+                save_chunk(current_chunk, chunk1)
+                save_chunk(closest_chunk, chunk2)
                 save_data(player, join("world data", "world1", "player data.pkl"))
-                save_data(noise, join("world data", "world1", "noise.pkl"))
                 write_pair("world data\\world1\\offsets.txt", round(x_offset), round(y_offset))
+                write_pair("world data\\world1\\loaded chunks.txt", current_chunk, closest_chunk)
                 RUN = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -278,8 +315,8 @@ if __name__ == "__main__":
                     print("Current chunk x = ", current_chunk)
                     print("Previous chunk x = ", prev_chunk)
                     print("Current y = ", player.rect.y)
-                    print("Chunk change = ", chunck_changed)
-                    print("Formula = ", (player.rect.x // block_size), "\n")
+                    print("Closest chunk = ", closest_chunk)
+                    print("Current x = ", player.rect.x // block_size, "\n")
                     
 
         keys = pygame.key.get_pressed()
@@ -299,18 +336,24 @@ if __name__ == "__main__":
         ) or (player.rect.top - y_offset <= scroll_area and player.y_vel < 0):
             y_offset += player.y_vel
 
+        # managing chunk generation
         if prev_chunk != current_chunk:
+            # swaping chunks
+            chunk1, chunk2 = chunk2, chunk1
+            swap = True
+        else:
+            swap = False
+
+        if prev_closest_chunk != closest_chunk and not swap:
             # saving all data
-            save_data(blocks, join("world data", "world1", f"{prev_chunk}.pkl"))
-            save_data(player, join("world data", "world1", "player data.pkl"))
-            save_data(noise, join("world data", "world1", "noise.pkl"))
-            write_pair("world data\\world1\\offsets.txt", round(x_offset), round(y_offset))
-            if isfile(f"world data\\world1\\{current_chunk}.pkl"):
-                blocks = load_data(f"world data\\world1\\{current_chunk}.pkl")
+            save_chunk(prev_closest_chunk, chunk2)
+            if isfile(f"world data\\world1\\{closest_chunk}.pkl"):
+                chunk2 = load_data(f"world data\\world1\\{closest_chunk}.pkl")
             else:
-                blocks = generate_world(current_chunk*chunck_size, current_chunk*chunck_size+chunck_size)
+                chunk2 = generate_world(closest_chunk*chunck_size, closest_chunk*chunck_size+chunck_size)
+
         maintain_inventory(inventory, held, external_inventory, result_inventory)
-        player.loop(blocks)
+        player.loop([*chunk1, *chunk2])
         display()
 
     pygame.quit()
