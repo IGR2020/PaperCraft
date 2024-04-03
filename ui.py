@@ -1,7 +1,7 @@
 import pygame
 from objects import Item
 from pygame_tools import blit_text
-from constants import block_size, block_images
+from constants import block_size, assets
 
 
 # finds available or matching slots for an item
@@ -94,7 +94,7 @@ def render_ui(
     if held.item is not None:
         x, y = pygame.mouse.get_pos()
         pos = (x - block_size / 2, y - block_size / 2)
-        window.blit(block_images[held.item.name], pos)
+        window.blit(assets[held.item.name], pos)
         blit_text(window, str(held.item.count), pos=pos, size=20)
 
 

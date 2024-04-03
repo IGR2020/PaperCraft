@@ -1,6 +1,6 @@
 import pygame
 from os import listdir
-from os.path import join
+from os.path import join, isfile
 
 pygame.font.init()
 
@@ -35,6 +35,8 @@ class Button:
 def load_assets(path, size: int = None):
     sprites = {}
     for file in listdir(path):
+        if not isfile(join(path, file)):
+            continue
         if size is None:
             sprites[file.replace(".png", "")] = pygame.image.load(join(path, file))
         else:

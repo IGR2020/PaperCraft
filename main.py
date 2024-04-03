@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 import pygame
 
@@ -12,7 +12,7 @@ from world import load_data, save_data, read_pair, write_pair
 
 from os.path import join, isfile
 
-from math import floor, ceil
+from math import floor
 
 from ui import (
     render_ui,
@@ -26,9 +26,8 @@ def generate_world(starting_x, ending_x):
     objects = []
     for x in range(starting_x, ending_x):
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
-        for y in range(current_height, 64):
-            if noise((x*cave_variation, y*cave_variation)) * cave_size < 0.5:
-                objects.append(
+        for y in range(current_height, current_height+4):
+            objects.append(
                     Block(
                         x * block_size,
                         y * block_size,
@@ -36,6 +35,53 @@ def generate_world(starting_x, ending_x):
                         "Stone",
                     )
                 )
+        for y in range(current_height+4, 64):
+            if noise((x*cave_variation, y*cave_variation)) * cave_size < 0.5:
+                if abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.02:
+                    objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Coal Ore",
+                    )
+                )
+                elif abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.04:
+                    objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Copper Ore",
+                    )
+                )
+                elif abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.06:
+                    objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Iron Ore",
+                    )
+                )
+                elif abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.0601:
+                    objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Diamond Ore",
+                    )
+                )
+                else:
+                    objects.append(
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Stone",
+                        )
+                    )
         objects.append(
                     Block(
                         x * block_size,
@@ -326,6 +372,12 @@ if __name__ == "__main__":
                     print("Current y = ", player.rect.y)
                     print("Closest chunk = ", closest_chunk)
                     print("Current x = ", player.rect.x // block_size, "\n")
+                
+                if event.key == pygame.K_TAB:
+                    player.rect.x = 450
+                    player.rect.y = -1500
+                    x_offset = 0
+                    y_offset = -1500
                     
 
         keys = pygame.key.get_pressed()
