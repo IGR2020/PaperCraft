@@ -56,6 +56,9 @@ __2dminecraft-V-0.6__
     + inventory saving
     + cave generation
     + bedrock
+
 __2dminecraft-V-0.7__
     + added ore generation
     # nerf coal and buff diamond a lot
+    + balancing ore spawns
+    + redstone, lapis, and emerald ore added

@@ -1,4 +1,4 @@
-from random import randint, choice
+from random import randint
 
 import pygame
 
@@ -13,6 +13,8 @@ from world import load_data, save_data, read_pair, write_pair
 from os.path import join, isfile
 
 from math import floor
+
+from time import perf_counter
 
 from ui import (
     render_ui,
@@ -35,9 +37,9 @@ def generate_world(starting_x, ending_x):
                         "Stone",
                     )
                 )
-        for y in range(current_height+4, 64):
+        for y in range(current_height+4, world_depth):
             if noise((x*cave_variation, y*cave_variation)) * cave_size < 0.5:
-                if abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.02:
+                if abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.022 and y < 32:
                     objects.append(
                     Block(
                         x * block_size,
@@ -46,7 +48,7 @@ def generate_world(starting_x, ending_x):
                         "Coal Ore",
                     )
                 )
-                elif abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.04:
+                elif 0.02 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.04 and y < 38:
                     objects.append(
                     Block(
                         x * block_size,
@@ -55,7 +57,7 @@ def generate_world(starting_x, ending_x):
                         "Copper Ore",
                     )
                 )
-                elif abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.06:
+                elif 0.04 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.06 and 26 < y < 54:
                     objects.append(
                     Block(
                         x * block_size,
@@ -64,13 +66,41 @@ def generate_world(starting_x, ending_x):
                         "Iron Ore",
                     )
                 )
-                elif abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.0601:
+                elif 0.059 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.0607 and y > 52:
                     objects.append(
                     Block(
                         x * block_size,
                         y * block_size,
                         block_size,
                         "Diamond Ore",
+                    )
+                )
+                elif 0.0607 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.07 and y > 48:
+                    objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Redstone Ore",
+                    )
+                )
+                elif 0.07 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.085 and y > 44:
+                    objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Lapis Ore",
+                    )
+                )
+                elif 0.07 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.074 and y > 58:
+                    print("eme")
+                    objects.append(
+                    Block(
+                        x * block_size,
+                        y * block_size,
+                        block_size,
+                        "Emerald Ore",
                     )
                 )
                 else:
