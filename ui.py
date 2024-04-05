@@ -5,14 +5,13 @@ from constants import block_size, assets
 
 
 # finds available or matching slots for an item
-def find_slot(item_name, inventory, max_stack_count=64):
+def find_slot(item_name, inventory, max_stack_count=64, avail_count_needed=1):
     for i, button in enumerate(inventory):
         if button.item is None:
             return i
-        elif button.item.count < max_stack_count and button.item.name == item_name:
+        elif button.item.count <= max_stack_count - avail_count_needed and button.item.name == item_name:
             return i
-    else:
-        return None
+    return None
 
 
 # checking for proper inventory
@@ -27,11 +26,15 @@ def maintain_slots(inventory, max_stack_size=64):
         elif button.item.count < 1:
             inventory[i].item = None
             continue
-        # illegal item treatment
+
+        # getting data
         overflow = button.item.count - max_stack_size
-        button.item.count - overflow
         # finding available position and depositing item if found
         index = find_slot(button.item.name, inventory, max_stack_size)
+
+        #treatment
+        button.item.count - overflow
+
         if index is None:
             continue
         if inventory[index].item is not None:

@@ -3,7 +3,7 @@ from random import randint
 import pygame
 
 from player import Player
-from objects import Block, Item, CraftingTable, Chest
+from objects import Block, Item, CraftingTable, Chest, EntityItem
 
 from perlin_noise import PerlinNoise
 from constants import *
@@ -13,8 +13,6 @@ from world import load_data, save_data, read_pair, write_pair
 from os.path import join, isfile
 
 from math import floor
-
-from time import perf_counter
 
 from ui import (
     render_ui,
@@ -275,9 +273,18 @@ def interact(obj):
 def save_chunk(chunk, chunk_data):
     save_data(chunk_data, join("world data", "world1", f"{chunk}.pkl"))
 
+def manage_collisions():
+    for obj in chunk1:
+        for entity in entities:
+            entity.solve_collision(obj)
+    for obj in chunk2:
+        for entity in entities:
+            entity.solve_collision(obj)
 
 def display():
     window.fill((150, 150, 255))
+    for entity in entities:
+        entity.display(window, x_offset, y_offset)
     for obj in chunk1:
         obj.render(window, x_offset, y_offset)
     for obj in chunk2:
@@ -330,8 +337,13 @@ if __name__ == "__main__":
     external_inventory_type = None
     result_inventory = None
 
+    # entities
+    entities = []
+
     selection = 0
     inv_view = False
+
+    player.inventory[0].item = Item("Oak Planks", 64)
 
     while RUN:
         CLOCK.tick(FPS)
@@ -408,6 +420,14 @@ if __name__ == "__main__":
                     player.rect.y = -1500
                     x_offset = 0
                     y_offset = -1500
+
+                if event.key == pygame.K_q:
+                    x, y = pygame.mouse.get_pos()
+                    x += x_offset
+                    y += y_offset
+                    if player.inventory[selection].item is not None:
+                        entities.append(EntityItem(player.inventory[selection].item.name, (x, y)))
+                        player.inventory[selection].item.count -= 1
                     
 
         keys = pygame.key.get_pressed()
@@ -442,9 +462,29 @@ if __name__ == "__main__":
                 chunk2 = load_data(f"world data\\world1\\{closest_chunk}.pkl")
             else:
                 chunk2 = generate_world(closest_chunk*chunck_size, closest_chunk*chunck_size+chunck_size)
+            if isfile(f"world data\\world1\\{current_chunk}.pkl"):
+                save_data(chunk1 ,f"world data\\world1\\{current_chunk}.pkl")
 
+        # checking for entity collision
+        for entity in entities:
+            entity.script()
+            if player.rect.colliderect(entity.rect):
+                slot = find_slot(entity.name, player.inventory)
+                if slot is None:
+                    pass
+                elif player.inventory[slot].item is None:
+                    player.inventory[slot].item = Item(entity.name, entity.count)
+                else:
+                    player.inventory[slot].item.count += entity.count
+                entities.remove(entity)
+            for ent in entities:
+                if ent.rect.colliderect(entity) and ent.name == entity.name and id(ent) != id(entity):
+                    entity.count += ent.count
+                    entities.remove(ent)
+
+        manage_collisions()
         maintain_inventory(player.inventory, player.held, external_inventory, result_inventory)
-        player.loop([*chunk1, *chunk2])
+        player.script([*chunk1, *chunk2])
         display()
 
     pygame.quit()

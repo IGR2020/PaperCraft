@@ -62,3 +62,4 @@ __2dminecraft-V-0.7__
     # nerf coal and buff diamond a lot
     + balancing ore spawns
     + redstone, lapis, and emerald ore added
+    + items added (buggy)

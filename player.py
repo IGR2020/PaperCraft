@@ -20,7 +20,7 @@ class Player(pygame.sprite.Sprite):
     def render(self, screen, x_offset, y_offset):
         screen.blit(assets["Player"], (self.rect.x - x_offset, self.rect.y - y_offset))
 
-    def loop(self, objects):
+    def script(self, objects):
         self.y_vel += self.fall_speed
         self.y_vel = min(16, self.y_vel)
         self.rect.y += self.y_vel
@@ -44,6 +44,7 @@ class Player(pygame.sprite.Sprite):
                 elif self.x_vel < 0:
                     self.rect.left = obj.rect.right
         self.x_vel = 0
+        
 
     def move_left(self):
         self.x_vel += 5

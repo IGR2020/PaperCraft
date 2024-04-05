@@ -10,6 +10,8 @@ FPS = 60
 RUN = True
 CLOCK = pygame.time.Clock()
 
+item_fall_speed = 0.2
+
 block_size = 32
 
 terrain_smoothness = 0.03

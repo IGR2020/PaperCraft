@@ -1,6 +1,6 @@
 import pygame
 from pygame_tools import blit_text
-from constants import slot_size, assets
+from constants import slot_size, assets, item_fall_speed
 
 
 class Object():
@@ -54,27 +54,28 @@ class Chest(Block):
                 self.inventory.append(Slot((i * slot_size, j * slot_size), None, "Slot"))
         self.result_inventory = None
 
-# update display func to refrence image from constants
+
 class EntityItem:
-    def __init__(self, img, size, pos):
-        self.img = pygame.transform.scale(img, size)
-        self.rect = self.img.get_rect(topleft=pos)
+    def __init__(self, name, pos, count=1):
+        self.name = name
+        self.rect = assets[name].get_rect(topleft=pos)
         self.y_vel = 0
-        self.fall_speed = 0.2
+        self.count = count
 
     def display(self, screen, x_offset, y_offset):
-        screen.blit(self.img, (self.rect.x - x_offset, self.rect.y - y_offset))
+        screen.blit(assets[self.name], (self.rect.x - x_offset, self.rect.y - y_offset))
 
-    def loop(self, objects):
-        self.y_vel += self.fall_speed
+    def script(self):
+        self.y_vel += item_fall_speed
         self.rect.y += self.y_vel
-        for obj in objects:
-            if self.rect.colliderect(obj.rect):
-                if self.y_vel > 0:
-                    self.y_vel = 0
-                    self.rect.bottom = obj.rect.top
-                elif self.y_vel < 0:
-                    self.rect.top = obj.rect.bottom
+        
+    def solve_collision(self, obj):
+        if self.rect.colliderect(obj.rect):
+            if self.y_vel > 0:
+                self.y_vel = 0
+                self.rect.bottom = obj.rect.top
+            elif self.y_vel < 0:
+                self.rect.top = obj.rect.bottom
 
 class Button:
     def __init__(self, pos, name):
