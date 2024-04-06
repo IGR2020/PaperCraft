@@ -14,6 +14,8 @@ from os.path import join, isfile
 
 from math import floor
 
+from menu import main_menu
+
 from ui import (
     render_ui,
     find_slot,
@@ -37,7 +39,7 @@ def generate_world(starting_x, ending_x):
                 )
         for y in range(current_height+4, world_depth):
             if noise((x*cave_variation, y*cave_variation)) * cave_size < 0.5:
-                if abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.022 and y < 32:
+                if abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.07 and y < randint(28, 38):
                     objects.append(
                     Block(
                         x * block_size,
@@ -46,7 +48,7 @@ def generate_world(starting_x, ending_x):
                         "Coal Ore",
                     )
                 )
-                elif 0.02 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.04 and y < 38:
+                elif 0.04 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.12 and y < randint(30, 44):
                     objects.append(
                     Block(
                         x * block_size,
@@ -55,7 +57,7 @@ def generate_world(starting_x, ending_x):
                         "Copper Ore",
                     )
                 )
-                elif 0.04 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.06 and 26 < y < 54:
+                elif 0.09 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.13 and randint(22, 28) < y < randint(48, 60):
                     objects.append(
                     Block(
                         x * block_size,
@@ -64,7 +66,8 @@ def generate_world(starting_x, ending_x):
                         "Iron Ore",
                     )
                 )
-                elif 0.059 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.0607 and y > 52:
+                elif 0.11 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.12 and y > randint(46, 60):
+                    print("dia")
                     objects.append(
                     Block(
                         x * block_size,
@@ -73,7 +76,7 @@ def generate_world(starting_x, ending_x):
                         "Diamond Ore",
                     )
                 )
-                elif 0.0607 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.07 and y > 48:
+                elif 0.12 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.17 and y > randint(40, 54):
                     objects.append(
                     Block(
                         x * block_size,
@@ -82,7 +85,7 @@ def generate_world(starting_x, ending_x):
                         "Redstone Ore",
                     )
                 )
-                elif 0.07 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.085 and y > 44:
+                elif 0.15 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.2 and y > randint(38, 52):
                     objects.append(
                     Block(
                         x * block_size,
@@ -91,7 +94,7 @@ def generate_world(starting_x, ending_x):
                         "Lapis Ore",
                     )
                 )
-                elif 0.07 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.074 and y > 58:
+                elif 0.2 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.21 and y > randint(54, 62):
                     print("eme")
                     objects.append(
                     Block(
@@ -271,7 +274,7 @@ def interact(obj):
         result_inventory = obj.result_inventory
 
 def save_chunk(chunk, chunk_data):
-    save_data(chunk_data, join("world data", "world1", f"{chunk}.pkl"))
+    save_data(chunk_data, join("worlds", world_name, f"{chunk}.pkl"))
 
 def manage_collisions():
     for obj in chunk1:
@@ -304,31 +307,35 @@ def display():
 
 
 if __name__ == "__main__":
+    # main menu and getting information
+    world_name = main_menu()
+
+
     # getting noise
-    if isfile("world data\\world1\\noise.pkl"):
-        noise = load_data("world data\\world1\\noise.pkl")
+    if isfile(f"worlds\\{world_name}\\noise.pkl"):
+        noise = load_data(f"worlds\\{world_name}\\noise.pkl")
     else:
         noise = PerlinNoise()
-        save_data(noise, "world data\\world1\\noise.pkl")
+        save_data(noise, f"worlds\\{world_name}\\noise.pkl")
 
     # getting the loaded chunks
-    current_chunk, closest_chunk = read_pair("world data\\world1\\loaded chunks.txt")
+    current_chunk, closest_chunk = read_pair(f"worlds\\{world_name}\\loaded chunks.txt")
 
     # checking if a world exists and reading from it
-    if isfile(f"world data\\world1\\{current_chunk}.pkl"):
-        chunk1 = load_data(f"world data\\world1\\{current_chunk}.pkl")
+    if isfile(f"worlds\\{world_name}\\{current_chunk}.pkl"):
+        chunk1 = load_data(f"worlds\\{world_name}\\{current_chunk}.pkl")
     else:
         chunk1 = generate_world(0, chunck_size)
-    if isfile(f"world data\\world1\\{closest_chunk}.pkl"):
-        chunk2 = load_data(f"world data\\world1\\{closest_chunk}.pkl")
+    if isfile(f"worlds\\{world_name}\\{closest_chunk}.pkl"):
+        chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")
     else:
         chunk2 = generate_world(-chunck_size, 0)
-    if isfile("world data\\world1\\player data.pkl"):
-        player = load_data("world data\\world1\\player data.pkl")
+    if isfile(f"worlds\\{world_name}\\player data.pkl"):
+        player = load_data(f"worlds\\{world_name}\\player data.pkl")
     else:
         player = Player(28, 56)
         player.inventory[0].item = Item("Crafting Table")
-    x_offset, y_offset = read_pair("world data\\world1\\offsets.txt")
+    x_offset, y_offset = read_pair(f"worlds\\{world_name}\\offsets.txt")
     current_chunk = 0
     closest_chunk = -1
     swap = False
@@ -342,8 +349,6 @@ if __name__ == "__main__":
 
     selection = 0
     inv_view = False
-
-    player.inventory[0].item = Item("Oak Planks", 64)
 
     while RUN:
         CLOCK.tick(FPS)
@@ -363,9 +368,9 @@ if __name__ == "__main__":
                 # saving all data
                 save_chunk(current_chunk, chunk1)
                 save_chunk(closest_chunk, chunk2)
-                save_data(player, join("world data", "world1", "player data.pkl"))
-                write_pair("world data\\world1\\offsets.txt", round(x_offset), round(y_offset))
-                write_pair("world data\\world1\\loaded chunks.txt", current_chunk, closest_chunk)
+                save_data(player, join("worlds", world_name, "player data.pkl"))
+                write_pair(f"worlds\\{world_name}\\offsets.txt", round(x_offset), round(y_offset))
+                write_pair(f"worlds\\{world_name}\\loaded chunks.txt", current_chunk, closest_chunk)
                 RUN = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -458,12 +463,12 @@ if __name__ == "__main__":
         if prev_closest_chunk != closest_chunk and not swap:
             # saving all data
             save_chunk(prev_closest_chunk, chunk2)
-            if isfile(f"world data\\world1\\{closest_chunk}.pkl"):
-                chunk2 = load_data(f"world data\\world1\\{closest_chunk}.pkl")
+            if isfile(f"worlds\\{world_name}\\{closest_chunk}.pkl"):
+                chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")
             else:
                 chunk2 = generate_world(closest_chunk*chunck_size, closest_chunk*chunck_size+chunck_size)
-            if isfile(f"world data\\world1\\{current_chunk}.pkl"):
-                save_data(chunk1 ,f"world data\\world1\\{current_chunk}.pkl")
+            if isfile(f"worlds\\{world_name}\\{current_chunk}.pkl"):
+                save_data(chunk1 ,f"worlds\\{world_name}\\{current_chunk}.pkl")
 
         # checking for entity collision
         for entity in entities:

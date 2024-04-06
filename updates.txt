@@ -63,3 +63,5 @@ __2dminecraft-V-0.7__
     + balancing ore spawns
     + redstone, lapis, and emerald ore added
     + items added (buggy)
+    + main menu
+    + world creation

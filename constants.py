@@ -17,8 +17,8 @@ block_size = 32
 terrain_smoothness = 0.03
 terrain_variation = 30
 cave_size = 24
-cave_variation = 0.2
-ore_generation = 0.8
+cave_variation = 0.16
+ore_generation = 0.04
 ore_vein_size = 7
 
 stack_size = 64

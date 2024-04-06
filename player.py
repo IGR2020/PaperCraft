@@ -24,7 +24,6 @@ class Player(pygame.sprite.Sprite):
         self.y_vel += self.fall_speed
         self.y_vel = min(16, self.y_vel)
         self.rect.y += self.y_vel
-
         for obj in objects:
             if self.rect.colliderect(obj.rect):
                 if self.y_vel > 0:
