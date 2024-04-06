@@ -35,3 +35,9 @@ assets = load_assets("assets\\Blocks", (block_size, block_size))
 other_assets = load_assets("assets")
 assets.update(other_assets)
 del other_assets
+
+# horror assets
+assets["Light"] = pygame.transform.scale(assets["Light"], (300, 300))
+horror_bg_color = (0, 0, 0)
+filter = pygame.Surface((WIDTH, HEIGHT))
+filter.fill(pygame.color.Color("Grey"))

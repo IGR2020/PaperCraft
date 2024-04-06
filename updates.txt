@@ -65,3 +65,5 @@ __2dminecraft-V-0.7__
     + items added (buggy)
     + main menu
     + world creation
+    + horror mode effects
+    + world generation bugs fixed

@@ -285,7 +285,10 @@ def manage_collisions():
             entity.solve_collision(obj)
 
 def display():
-    window.fill((150, 150, 255))
+    if world_type == "Horror":
+        window.fill(horror_bg_color)
+    elif world_type == "Normal":
+        window.fill((150, 150, 255))
     for entity in entities:
         entity.display(window, x_offset, y_offset)
     for obj in chunk1:
@@ -293,6 +296,14 @@ def display():
     for obj in chunk2:
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
+    if world_type == "Horror":
+        filter.fill(pygame.color.Color('Grey'))
+        y = player.rect.y + 28 - y_offset
+        x = player.rect.x + 14 - x_offset
+        x -= 150
+        y -= 150
+        filter.blit(assets["Light"], (x, y))
+        window.blit(filter, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
     render_ui(
         window,
         player.inventory,
@@ -308,7 +319,7 @@ def display():
 
 if __name__ == "__main__":
     # main menu and getting information
-    world_name = main_menu()
+    world_name, world_type = main_menu()
 
 
     # getting noise
@@ -453,7 +464,7 @@ if __name__ == "__main__":
             y_offset += player.y_vel
 
         # managing chunk generation
-        if prev_chunk != current_chunk:
+        if prev_chunk != current_chunk and not swap:
             # swaping chunks
             chunk1, chunk2 = chunk2, chunk1
             swap = True
@@ -469,6 +480,7 @@ if __name__ == "__main__":
                 chunk2 = generate_world(closest_chunk*chunck_size, closest_chunk*chunck_size+chunck_size)
             if isfile(f"worlds\\{world_name}\\{current_chunk}.pkl"):
                 save_data(chunk1 ,f"worlds\\{world_name}\\{current_chunk}.pkl")
+            swap = True
 
         # checking for entity collision
         for entity in entities:

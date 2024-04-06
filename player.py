@@ -11,6 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.x_vel = 0
         self.fall_speed = 0.2
         self.jump_count = 0
+        self.direction = "left"
         self.inventory = []
         for j in range(9, 4, -1):
             for i in range(6, 12):
@@ -47,9 +48,11 @@ class Player(pygame.sprite.Sprite):
 
     def move_left(self):
         self.x_vel += 5
+        self.direction = "left"
 
     def move_right(self):
         self.x_vel -= 5
+        self.direction = "right"
 
     def jump(self):
         if self.jump_count == 0:
