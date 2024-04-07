@@ -19,9 +19,10 @@ class Block(Object):
 
 
 class Item:
-    def __init__(self, name, count=1) -> None:
+    def __init__(self, name, type, count=1) -> None:
         self.name = name
         self.count = count
+        self.type = type
 
     def display(self, rect, window):
         window.blit(assets[self.name], (rect.x + 8, rect.y + 8))
@@ -56,11 +57,12 @@ class Chest(Block):
 
 
 class EntityItem:
-    def __init__(self, name, pos, count=1):
+    def __init__(self, name, pos, type, count=1):
         self.name = name
         self.rect = assets[name].get_rect(topleft=pos)
         self.y_vel = 0
         self.count = count
+        self.type = type
 
     def display(self, screen, x_offset, y_offset):
         screen.blit(assets[self.name], (self.rect.x - x_offset, self.rect.y - y_offset))

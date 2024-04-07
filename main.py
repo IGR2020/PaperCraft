@@ -86,7 +86,6 @@ def generate_world(starting_x, ending_x):
                 elif 0.11 < abs(
                     noise((x * ore_generation, y * ore_generation)) * ore_vein_size
                 ) < 0.12 and y > randint(46, 60):
-                    print("dia")
                     objects.append(
                         Block(
                             x * block_size,
@@ -117,10 +116,20 @@ def generate_world(starting_x, ending_x):
                             "Lapis Ore",
                         )
                     )
+                elif 0.21 < abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.24 and y > randint(38, 52):
+                    objects.append(
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Gold Ore",
+                        )
+                    )
                 elif 0.2 < abs(
                     noise((x * ore_generation, y * ore_generation)) * ore_vein_size
                 ) < 0.21 and y > randint(54, 62):
-                    print("eme")
                     objects.append(
                         Block(
                             x * block_size,
@@ -216,13 +225,51 @@ def delete_block():
         if obj.rect.collidepoint((x, y)):
             if obj.name == "Bedrock":
                 return
-            entities.append(EntityItem(obj.name, obj.rect.topleft, 1))
+            elif obj.name == "Stone":
+                entities.append(EntityItem("Cobblestone", obj.rect.topleft, "Block", 1))
+            elif obj.name == "Diamond Ore":
+                entities.append(EntityItem("Diamond", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Iron Ore":
+                entities.append(EntityItem("Raw Iron", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Redstone Ore":
+                entities.append(EntityItem("Redstone", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Lapis Ore":
+                entities.append(EntityItem("Lapis", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Emerald Ore":
+                entities.append(EntityItem("Emerald", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Gold Ore":
+                entities.append(EntityItem("Raw Gold", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Copper Ore":
+                entities.append(EntityItem("Raw Copper", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Coal Ore":
+                entities.append(EntityItem("Coal", obj.rect.topleft, "Item", 1))
+            else:
+                entities.append(EntityItem(obj.name, obj.rect.topleft, "Block", 1))
             chunk1.remove(obj)
     for obj in chunk2:
         if obj.rect.collidepoint((x, y)):
             if obj.name == "Bedrock":
                 return
-            entities.append(EntityItem(obj.name, obj.rect.topleft, 1))
+            elif obj.name == "Stone":
+                entities.append(EntityItem("Cobblestone", obj.rect.topleft, "Block", 1))
+            elif obj.name == "Diamond Ore":
+                entities.append(EntityItem("Diamond", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Iron Ore":
+                entities.append(EntityItem("Raw Iron", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Redstone Ore":
+                entities.append(EntityItem("Redstone", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Lapis Ore":
+                entities.append(EntityItem("Lapis", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Emerald Ore":
+                entities.append(EntityItem("Emerald", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Gold Ore":
+                entities.append(EntityItem("Raw Gold", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Copper Ore":
+                entities.append(EntityItem("Raw Copper", obj.rect.topleft, "Item", 1))
+            elif obj.name == "Coal Ore":
+                entities.append(EntityItem("Coal", obj.rect.topleft, "Item", 1))
+            else:
+                entities.append(EntityItem(obj.name, obj.rect.topleft, "Block", 1))
             chunk2.remove(obj)
 
 
@@ -244,6 +291,8 @@ def right_click():
     if player.inventory[selection].item is None:
         return
     if player.rect.collidepoint((x, y)):
+        return
+    if player.inventory[selection].item.type == "Item":
         return
     # placing block
     x, y = setpos((x, y))
@@ -360,7 +409,7 @@ if __name__ == "__main__":
         player = load_data(f"worlds\\{world_name}\\player data.pkl")
     else:
         player = Player(28, 56)
-        player.inventory[0].item = Item("Crafting Table")
+        player.inventory[0].item = Item("Crafting Table", "Block")
     x_offset, y_offset = read_pair(f"worlds\\{world_name}\\offsets.txt")
     current_chunk = 0
     closest_chunk = -1
@@ -474,7 +523,7 @@ if __name__ == "__main__":
                     y += y_offset
                     if player.inventory[selection].item is not None:
                         entities.append(
-                            EntityItem(player.inventory[selection].item.name, (x, y))
+                            EntityItem(player.inventory[selection].item.name, (x, y), player.inventory[selection].item.type)
                         )
                         player.inventory[selection].item.count -= 1
 
@@ -524,7 +573,7 @@ if __name__ == "__main__":
                 if slot is None:
                     pass
                 elif player.inventory[slot].item is None:
-                    player.inventory[slot].item = Item(entity.name, entity.count)
+                    player.inventory[slot].item = Item(entity.name, entity.type, entity.count)
                 else:
                     player.inventory[slot].item.count += entity.count
                 entities.remove(entity)

@@ -69,3 +69,6 @@ __2dminecraft-V-0.7__
     + world generation bugs fixed
     + item integration
     + bug fixes
+    + 1 new blocks
+    + 8 new items
+    

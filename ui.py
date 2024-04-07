@@ -9,7 +9,10 @@ def find_slot(item_name, inventory, max_stack_count=64, avail_count_needed=1):
     for i, button in enumerate(inventory):
         if button.item is None:
             return i
-        elif button.item.count <= max_stack_count - avail_count_needed and button.item.name == item_name:
+        elif (
+            button.item.count <= max_stack_count - avail_count_needed
+            and button.item.name == item_name
+        ):
             return i
     return None
 
@@ -32,7 +35,7 @@ def maintain_slots(inventory, max_stack_size=64):
         # finding available position and depositing item if found
         index = find_slot(button.item.name, inventory, max_stack_size)
 
-        #treatment
+        # treatment
         button.item.count - overflow
 
         if index is None:
@@ -40,7 +43,7 @@ def maintain_slots(inventory, max_stack_size=64):
         if inventory[index].item is not None:
             inventory[index].item.count += overflow
         if inventory[index].item is None:
-            button.item = Item(button.item.name, overflow)
+            button.item = Item(button.item.name, button.item.type, overflow)
     return
 
 
@@ -127,11 +130,11 @@ def manage_inventory(
                 if held.item is None and slot.item is None:
                     return
                 elif held.item is None and slot.item is not None:
-                    held.item = Item(slot.item.name, 0)
+                    held.item = Item(slot.item.name, slot.item.type, 0)
                     held.item.count += slot.item.count // 2
                     slot.item.count -= slot.item.count // 2
                 elif held.item is not None and slot.item is None:
-                    slot.item = Item(held.item.name, 0)
+                    slot.item = Item(held.item.name, held.item.type, 0)
                     held.item.count -= 1
                     slot.item.count += 1
                 elif held.item.name == slot.item.name:
@@ -153,24 +156,31 @@ def craft(external_inventory):
     if len(recipe_components) < 1:
         return (None, None)
     elif recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
-        return (Item("Oak Planks", 4), recipe_components)
+        return (Item("Oak Planks", "Block", 4), recipe_components)
     elif (
         recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"]
         and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
     ):
-        return (Item("Crafting Table", 1), recipe_components)
+        return (Item("Crafting Table", "Block", 1), recipe_components)
     elif (
         recipe_components == ["Stone", "Stone", "Stone", "Stone"]
         and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
     ):
-        return (Item("Stone Brick", 4), recipe_components)
+        return (Item("Stone Brick", "Block", 4), recipe_components)
     elif (
         len(recipe_components) == 8
         and rci == [0, 1, 2, 3, 5, 6, 7, 8]
         and "Oak Planks" in recipe_components
         and len(set(recipe_components)) == 1
     ):
-        return (Item("Chest", 1), recipe_components)
+        return (Item("Chest", "Block", 1), recipe_components)
+    elif (
+        len(set(recipe_components)) == 1
+        and "Oak Planks" in recipe_components
+        and len(recipe_components) == 2
+        and rci[0] + 3 == rci[1]
+    ):
+        return (Item("Stick", "Item", 1), recipe_components)
     else:
         return (None, None)
 
