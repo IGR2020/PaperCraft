@@ -67,3 +67,5 @@ __2dminecraft-V-0.7__
     + world creation
     + horror mode effects
     + world generation bugs fixed
+    + item integration
+    + bug fixes

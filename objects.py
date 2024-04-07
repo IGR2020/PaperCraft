@@ -64,9 +64,10 @@ class EntityItem:
 
     def display(self, screen, x_offset, y_offset):
         screen.blit(assets[self.name], (self.rect.x - x_offset, self.rect.y - y_offset))
+        screen.blit(assets["Block Outline"], (self.rect.x - x_offset - 8, self.rect.y - y_offset - 8))
 
     def script(self):
-        self.y_vel += item_fall_speed
+        self.y_vel += item_fall_speed  
         self.rect.y += self.y_vel
         
     def solve_collision(self, obj):

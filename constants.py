@@ -7,7 +7,7 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Paper craft")
 
 FPS = 60
-RUN = True
+run = True
 CLOCK = pygame.time.Clock()
 
 item_fall_speed = 0.2
@@ -33,6 +33,7 @@ world_depth = 64
 
 assets = load_assets("assets\\Blocks", (block_size, block_size))
 other_assets = load_assets("assets")
+other_assets["Block Outline"] = pygame.transform.scale(other_assets["Block Outline"], (48, 48)) 
 assets.update(other_assets)
 del other_assets
 

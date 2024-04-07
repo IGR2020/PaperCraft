@@ -15,7 +15,9 @@ class Player(pygame.sprite.Sprite):
         self.inventory = []
         for j in range(9, 4, -1):
             for i in range(6, 12):
-                self.inventory.append(Slot((i * slot_size, j * slot_size), None, "Slot"))
+                self.inventory.append(
+                    Slot((i * slot_size, j * slot_size), None, "Slot")
+                )
         self.held = Slot((200, 200), None, "Slot")
 
     def render(self, screen, x_offset, y_offset):
@@ -44,7 +46,6 @@ class Player(pygame.sprite.Sprite):
                 elif self.x_vel < 0:
                     self.rect.left = obj.rect.right
         self.x_vel = 0
-        
 
     def move_left(self):
         self.x_vel += 5

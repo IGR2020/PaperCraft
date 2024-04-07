@@ -1,6 +1,8 @@
-from random import randint
-
 import pygame
+
+from threading import Thread
+
+from random import randint
 
 from player import Player
 from objects import Block, Item, CraftingTable, Chest, EntityItem
@@ -23,87 +25,110 @@ from ui import (
     manage_all_inventories,
 )
 
+def loop(func, fps: int):
+    def loop_func():
+        clock = pygame.time.Clock()
+        while run:
+            clock.tick(fps)
+            func()
+    return loop_func
+
+
 def generate_world(starting_x, ending_x):
     global noise
     objects = []
     for x in range(starting_x, ending_x):
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
-        for y in range(current_height, current_height+4):
+        for y in range(current_height, current_height + 4):
             objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Stone",
-                    )
+                Block(
+                    x * block_size,
+                    y * block_size,
+                    block_size,
+                    "Stone",
                 )
-        for y in range(current_height+4, world_depth):
-            if noise((x*cave_variation, y*cave_variation)) * cave_size < 0.5:
-                if abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.07 and y < randint(28, 38):
+            )
+        for y in range(current_height + 4, world_depth):
+            if noise((x * cave_variation, y * cave_variation)) * cave_size < 0.5:
+                if abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.07 and y < randint(28, 38):
                     objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Coal Ore",
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Coal Ore",
+                        )
                     )
-                )
-                elif 0.04 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.12 and y < randint(30, 44):
+                elif 0.04 < abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.12 and y < randint(30, 44):
                     objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Copper Ore",
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Copper Ore",
+                        )
                     )
-                )
-                elif 0.09 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.13 and randint(22, 28) < y < randint(48, 60):
+                elif 0.09 < abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.13 and randint(22, 28) < y < randint(48, 60):
                     objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Iron Ore",
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Iron Ore",
+                        )
                     )
-                )
-                elif 0.11 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.12 and y > randint(46, 60):
+                elif 0.11 < abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.12 and y > randint(46, 60):
                     print("dia")
                     objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Diamond Ore",
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Diamond Ore",
+                        )
                     )
-                )
-                elif 0.12 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.17 and y > randint(40, 54):
+                elif 0.12 < abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.17 and y > randint(40, 54):
                     objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Redstone Ore",
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Redstone Ore",
+                        )
                     )
-                )
-                elif 0.15 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.2 and y > randint(38, 52):
+                elif 0.15 < abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.2 and y > randint(38, 52):
                     objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Lapis Ore",
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Lapis Ore",
+                        )
                     )
-                )
-                elif 0.2 < abs(noise((x*ore_generation, y*ore_generation)) * ore_vein_size) < 0.21 and y > randint(54, 62):
+                elif 0.2 < abs(
+                    noise((x * ore_generation, y * ore_generation)) * ore_vein_size
+                ) < 0.21 and y > randint(54, 62):
                     print("eme")
                     objects.append(
-                    Block(
-                        x * block_size,
-                        y * block_size,
-                        block_size,
-                        "Emerald Ore",
+                        Block(
+                            x * block_size,
+                            y * block_size,
+                            block_size,
+                            "Emerald Ore",
+                        )
                     )
-                )
                 else:
                     objects.append(
                         Block(
@@ -114,20 +139,20 @@ def generate_world(starting_x, ending_x):
                         )
                     )
         objects.append(
-                    Block(
-                        x * block_size,
-                        64 * block_size,
-                        block_size,
-                        "Bedrock",
-                    )
-                )
+            Block(
+                x * block_size,
+                64 * block_size,
+                block_size,
+                "Bedrock",
+            )
+        )
         objects.append(
             Block(
                 x * block_size,
                 (current_height - 1) * block_size,
                 block_size,
                 "Dirt",
-            ) 
+            )
         )
         objects.append(
             Block(
@@ -191,25 +216,13 @@ def delete_block():
         if obj.rect.collidepoint((x, y)):
             if obj.name == "Bedrock":
                 return
-            slot = find_slot(obj.name, player.inventory)
-            if slot is None:
-                return
-            if player.inventory[slot].item is None:
-                player.inventory[slot].item = Item(obj.name, 1)
-            else:
-                player.inventory[slot].item.count += 1
+            entities.append(EntityItem(obj.name, obj.rect.topleft, 1))
             chunk1.remove(obj)
     for obj in chunk2:
         if obj.rect.collidepoint((x, y)):
             if obj.name == "Bedrock":
                 return
-            slot = find_slot(obj.name, player.inventory)
-            if slot is None:
-                return
-            if player.inventory[slot].item is None:
-                player.inventory[slot].item = Item(obj.name, 1)
-            else:
-                player.inventory[slot].item.count += 1
+            entities.append(EntityItem(obj.name, obj.rect.topleft, 1))
             chunk2.remove(obj)
 
 
@@ -241,7 +254,7 @@ def right_click():
         player.inventory[selection].item.name,
     ]
     # placing block into correct chunk
-    if floor((x//block_size)/chunck_size) != current_chunk:
+    if floor((x // block_size) / chunck_size) != current_chunk:
         # adding correct block type into block data
         if player.inventory[selection].item.name == "Crafting Table":
             chunk2.append(CraftingTable(*normal_args))
@@ -273,8 +286,10 @@ def interact(obj):
         external_inventory_type = "Chest"
         result_inventory = obj.result_inventory
 
+
 def save_chunk(chunk, chunk_data):
     save_data(chunk_data, join("worlds", world_name, f"{chunk}.pkl"))
+
 
 def manage_collisions():
     for obj in chunk1:
@@ -283,6 +298,7 @@ def manage_collisions():
     for obj in chunk2:
         for entity in entities:
             entity.solve_collision(obj)
+
 
 def display():
     if world_type == "Horror":
@@ -297,7 +313,7 @@ def display():
         obj.render(window, x_offset, y_offset)
     player.render(window, x_offset, y_offset)
     if world_type == "Horror":
-        filter.fill(pygame.color.Color('Grey'))
+        filter.fill(pygame.color.Color("Grey"))
         y = player.rect.y + 28 - y_offset
         x = player.rect.x + 14 - x_offset
         x -= 150
@@ -320,7 +336,6 @@ def display():
 if __name__ == "__main__":
     # main menu and getting information
     world_name, world_type = main_menu()
-
 
     # getting noise
     if isfile(f"worlds\\{world_name}\\noise.pkl"):
@@ -361,16 +376,18 @@ if __name__ == "__main__":
     selection = 0
     inv_view = False
 
-    while RUN:
+    while run:
+
+        # getting delta time
         CLOCK.tick(FPS)
 
         # getting chunk data
         prev_chunk = current_chunk
-        precise_chunk = (player.rect.x // block_size)/chunck_size
+        precise_chunk = (player.rect.x // block_size) / chunck_size
         current_chunk = floor(precise_chunk)
         prev_closest_chunk = closest_chunk
         if round(precise_chunk) == current_chunk:
-            closest_chunk = current_chunk - 1 
+            closest_chunk = current_chunk - 1
         else:
             closest_chunk = current_chunk + 1
 
@@ -380,15 +397,23 @@ if __name__ == "__main__":
                 save_chunk(current_chunk, chunk1)
                 save_chunk(closest_chunk, chunk2)
                 save_data(player, join("worlds", world_name, "player data.pkl"))
-                write_pair(f"worlds\\{world_name}\\offsets.txt", round(x_offset), round(y_offset))
-                write_pair(f"worlds\\{world_name}\\loaded chunks.txt", current_chunk, closest_chunk)
-                RUN = False
+                write_pair(
+                    f"worlds\\{world_name}\\offsets.txt",
+                    round(x_offset),
+                    round(y_offset),
+                )
+                write_pair(
+                    f"worlds\\{world_name}\\loaded chunks.txt",
+                    current_chunk,
+                    closest_chunk,
+                )
+                run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if not inv_view:
                     if event.button == 1:
                         delete_block()
-                    if event.button == 3  :
+                    if event.button == 3:
                         right_click()
                     if event.button == 4:
                         selection += 1
@@ -430,21 +455,28 @@ if __name__ == "__main__":
                     print("Current y = ", player.rect.y)
                     print("Closest chunk = ", closest_chunk)
                     print("Current x = ", player.rect.x // block_size, "\n")
-                
+
                 if event.key == pygame.K_TAB:
                     player.rect.x = 450
                     player.rect.y = -1500
                     x_offset = 0
                     y_offset = -1500
+                    current_chunk = 0
+                    closest_chunk = -1
+                    prev_chunk = 0
+                    prev_closest_chunk = -1
+                    chunk1 = load_data(f"worlds\\{world_name}\\{current_chunk}.pkl")
+                    chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")
 
                 if event.key == pygame.K_q:
                     x, y = pygame.mouse.get_pos()
                     x += x_offset
                     y += y_offset
                     if player.inventory[selection].item is not None:
-                        entities.append(EntityItem(player.inventory[selection].item.name, (x, y)))
+                        entities.append(
+                            EntityItem(player.inventory[selection].item.name, (x, y))
+                        )
                         player.inventory[selection].item.count -= 1
-                    
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
@@ -456,7 +488,6 @@ if __name__ == "__main__":
             player.rect.right - x_offset >= WIDTH - scroll_area and player.x_vel > 0
         ) or (player.rect.left - x_offset <= scroll_area and player.x_vel < 0):
             x_offset += player.x_vel
-
 
         if (
             player.rect.bottom - y_offset >= HEIGHT - scroll_area and player.y_vel > 0
@@ -477,9 +508,12 @@ if __name__ == "__main__":
             if isfile(f"worlds\\{world_name}\\{closest_chunk}.pkl"):
                 chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")
             else:
-                chunk2 = generate_world(closest_chunk*chunck_size, closest_chunk*chunck_size+chunck_size)
+                chunk2 = generate_world(
+                    closest_chunk * chunck_size,
+                    closest_chunk * chunck_size + chunck_size,
+                )
             if isfile(f"worlds\\{world_name}\\{current_chunk}.pkl"):
-                save_data(chunk1 ,f"worlds\\{world_name}\\{current_chunk}.pkl")
+                save_data(chunk1, f"worlds\\{world_name}\\{current_chunk}.pkl")
             swap = True
 
         # checking for entity collision
@@ -495,12 +529,18 @@ if __name__ == "__main__":
                     player.inventory[slot].item.count += entity.count
                 entities.remove(entity)
             for ent in entities:
-                if ent.rect.colliderect(entity) and ent.name == entity.name and id(ent) != id(entity):
+                if (
+                    ent.rect.colliderect(entity)
+                    and ent.name == entity.name
+                    and id(ent) != id(entity)
+                ):
                     entity.count += ent.count
                     entities.remove(ent)
 
         manage_collisions()
-        maintain_inventory(player.inventory, player.held, external_inventory, result_inventory)
+        maintain_inventory(
+            player.inventory, player.held, external_inventory, result_inventory
+        )
         player.script([*chunk1, *chunk2])
         display()
 
