@@ -22,3 +22,13 @@ def load_data(path) -> list:
         file.close()
     return blocks
 
+def write_string(data, path):
+    with open(path, "w") as file:
+        file.write(data)
+        file.close()
+
+def read_string(path):
+    with open(path, "r") as file:
+        data = file.read()
+        file.close()
+    return data

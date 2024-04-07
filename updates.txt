@@ -71,4 +71,5 @@ __2dminecraft-V-0.7__
     + bug fixes
     + 1 new blocks
     + 8 new items
-    # 1,177 lines of code!
+    # 1,185 lines of code!
+    + better item hinting and world version listing

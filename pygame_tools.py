@@ -6,7 +6,7 @@ pygame.font.init()
 
 
 def blit_text(
-    win, text, pos=(0, 0), colour=(0, 0, 0), size=30, font="arialblack", blit=True
+    win, text, pos, colour=(0, 0, 0), size=30, font="arialblack", blit=True
 ):
     font_style = pygame.font.SysFont(font, size)
     text_surface = font_style.render(text, False, colour)

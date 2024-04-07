@@ -10,7 +10,7 @@ from objects import Block, Item, CraftingTable, Chest, EntityItem
 from perlin_noise import PerlinNoise
 from constants import *
 
-from world import load_data, save_data, read_pair, write_pair
+from world import load_data, save_data, read_pair, write_pair, write_string
 
 from os.path import join, isfile
 
@@ -456,6 +456,8 @@ if __name__ == "__main__":
                     current_chunk,
                     closest_chunk,
                 )
+                write_string(VERSION, f"worlds\\{world_name}\\version.txt")
+
                 run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:

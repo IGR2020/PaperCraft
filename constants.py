@@ -31,9 +31,12 @@ chunck_size = 64
 world_height = -64
 world_depth = 64
 
+VERSION = "0.7.13b"
+
 assets = load_assets("assets\\Blocks", (block_size, block_size))
 other_assets = load_assets("assets")
-other_assets["Block Outline"] = pygame.transform.scale(other_assets["Block Outline"], (48, 48)) 
+other_assets["Block Outline"] = pygame.transform.scale(other_assets["Block Outline"], (48, 48))
+other_assets["Block Outline"].fill((255, 255, 255, 100), special_flags=pygame.BLEND_RGBA_MULT)
 assets.update(other_assets)
 del other_assets
 
