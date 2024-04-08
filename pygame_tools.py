@@ -44,3 +44,6 @@ def load_assets(path, size: int = None):
                 pygame.image.load(join(path, file)), size
             )
     return sprites
+
+def remove_prefix(str: str, prefix: str):
+    return str[len(prefix):] if str.startswith(prefix) else str

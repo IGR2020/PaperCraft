@@ -13,6 +13,7 @@ CLOCK = pygame.time.Clock()
 item_fall_speed = 0.2
 
 block_size = 32
+item_size = 24
 
 terrain_smoothness = 0.03
 terrain_variation = 30
@@ -31,14 +32,22 @@ chunck_size = 64
 world_height = -64
 world_depth = 64
 
-VERSION = "0.7.13b"
+VERSION = "0.7.15b"
 
+# loading all assets and merging into a single dict
 assets = load_assets("assets\\Blocks", (block_size, block_size))
 other_assets = load_assets("assets")
-other_assets["Block Outline"] = pygame.transform.scale(other_assets["Block Outline"], (48, 48))
-other_assets["Block Outline"].fill((255, 255, 255, 100), special_flags=pygame.BLEND_RGBA_MULT)
+items = load_assets("assets\\Blocks", (item_size, item_size))
+for i in items:
+    assets[f"Item {i}"] = items[i]
 assets.update(other_assets)
+overlays = load_assets("assets\\Overlay")
+for i in overlays:
+    assets[i] = overlays[i].set_colorkey((255, 255, 255))
 del other_assets
+del overlays
+del items
+
 
 # horror assets
 assets["Light"] = pygame.transform.scale(assets["Light"], (300, 300))

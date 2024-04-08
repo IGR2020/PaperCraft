@@ -23,27 +23,23 @@ def maintain_slots(inventory, max_stack_size=64):
         # checking if the item is illegal
         if button.item is None:
             continue
-        if not button.item.count > max_stack_size and button.item.count > 0:
+        elif button.item.count <= max_stack_size and button.item.count > 0:
             continue
         # quick treatment
         elif button.item.count < 1:
             inventory[i].item = None
             continue
 
-        # getting data
-        overflow = button.item.count - max_stack_size
         # finding available position and depositing item if found
         index = find_slot(button.item.name, inventory, max_stack_size)
-
-        # treatment
-        button.item.count - overflow
-
         if index is None:
             continue
-        if inventory[index].item is not None:
-            inventory[index].item.count += overflow
-        if inventory[index].item is None:
-            button.item = Item(button.item.name, button.item.type, overflow)
+        elif inventory[index].item is None:
+            inventory[index].item = Item(button.item.name, button.item.type, button.item.count)
+            inventory[index].item.count -= max_stack_size
+        else:
+            inventory[index].item.count += button.item.count - max_stack_size
+        button.item.count -= button.item.count - max_stack_size
     return
 
 

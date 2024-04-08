@@ -71,10 +71,6 @@ class EntityItem:
 
     def display(self, screen: pygame.Surface, x_offset, y_offset):
         screen.blit(assets[self.name], (self.rect.x - x_offset, self.rect.y - y_offset))
-        screen.blit(
-            assets["Block Outline"],
-            (self.rect.x - x_offset - 8, self.rect.y - y_offset - 8)
-        )
 
     def script(self):
         self.y_vel += item_fall_speed

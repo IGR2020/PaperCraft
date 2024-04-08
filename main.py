@@ -25,6 +25,8 @@ from ui import (
     manage_all_inventories,
 )
 
+from pygame_tools import remove_prefix
+
 def loop(func, fps: int):
     def loop_func():
         clock = pygame.time.Clock()
@@ -216,6 +218,31 @@ def setpos(pos):
     pos = x, y
     return pos
 
+def add_obj_as_entity(obj):
+    entity_pos = (obj.rect.x + 4, obj.rect.y + 4)
+    if obj.name == "Bedrock":
+        return
+    elif obj.name == "Stone":
+        entities.append(EntityItem("Item Cobblestone", entity_pos, "Block", 1))
+    elif obj.name == "Diamond Ore":
+        entities.append(EntityItem("Item Diamond", entity_pos, "Item", 1))
+    elif obj.name == "Iron Ore":
+        entities.append(EntityItem("Item Raw Iron", entity_pos, "Item", 1))
+    elif obj.name == "Redstone Ore":
+        entities.append(EntityItem("Item Redstone", entity_pos, "Item", 1))
+    elif obj.name == "Lapis Ore":
+        entities.append(EntityItem("Item Lapis", entity_pos, "Item", 1))
+    elif obj.name == "Emerald Ore":
+        entities.append(EntityItem("Item Emerald", entity_pos, "Item", 1))
+    elif obj.name == "Gold Ore":
+        entities.append(EntityItem("Item Raw Gold", entity_pos, "Item", 1))
+    elif obj.name == "Copper Ore":
+        entities.append(EntityItem("Item Raw Copper", entity_pos, "Item", 1))
+    elif obj.name == "Coal Ore":
+        entities.append(EntityItem("Item Coal", entity_pos, "Item", 1))
+    else:
+        entities.append(EntityItem(f"Item {obj.name}", entity_pos, "Block", 1))
+
 
 def delete_block():
     x, y = pygame.mouse.get_pos()
@@ -223,53 +250,11 @@ def delete_block():
     y += y_offset
     for obj in chunk1:
         if obj.rect.collidepoint((x, y)):
-            if obj.name == "Bedrock":
-                return
-            elif obj.name == "Stone":
-                entities.append(EntityItem("Cobblestone", obj.rect.topleft, "Block", 1))
-            elif obj.name == "Diamond Ore":
-                entities.append(EntityItem("Diamond", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Iron Ore":
-                entities.append(EntityItem("Raw Iron", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Redstone Ore":
-                entities.append(EntityItem("Redstone", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Lapis Ore":
-                entities.append(EntityItem("Lapis", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Emerald Ore":
-                entities.append(EntityItem("Emerald", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Gold Ore":
-                entities.append(EntityItem("Raw Gold", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Copper Ore":
-                entities.append(EntityItem("Raw Copper", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Coal Ore":
-                entities.append(EntityItem("Coal", obj.rect.topleft, "Item", 1))
-            else:
-                entities.append(EntityItem(obj.name, obj.rect.topleft, "Block", 1))
+            add_obj_as_entity(obj)
             chunk1.remove(obj)
     for obj in chunk2:
         if obj.rect.collidepoint((x, y)):
-            if obj.name == "Bedrock":
-                return
-            elif obj.name == "Stone":
-                entities.append(EntityItem("Cobblestone", obj.rect.topleft, "Block", 1))
-            elif obj.name == "Diamond Ore":
-                entities.append(EntityItem("Diamond", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Iron Ore":
-                entities.append(EntityItem("Raw Iron", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Redstone Ore":
-                entities.append(EntityItem("Redstone", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Lapis Ore":
-                entities.append(EntityItem("Lapis", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Emerald Ore":
-                entities.append(EntityItem("Emerald", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Gold Ore":
-                entities.append(EntityItem("Raw Gold", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Copper Ore":
-                entities.append(EntityItem("Raw Copper", obj.rect.topleft, "Item", 1))
-            elif obj.name == "Coal Ore":
-                entities.append(EntityItem("Coal", obj.rect.topleft, "Item", 1))
-            else:
-                entities.append(EntityItem(obj.name, obj.rect.topleft, "Block", 1))
+            add_obj_as_entity(obj)
             chunk2.remove(obj)
 
 
@@ -425,6 +410,8 @@ if __name__ == "__main__":
     selection = 0
     inv_view = False
 
+    mouse_down = False
+
     while run:
 
         # getting delta time
@@ -461,6 +448,7 @@ if __name__ == "__main__":
                 run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_down = True
                 if not inv_view:
                     if event.button == 1:
                         delete_block()
@@ -487,6 +475,9 @@ if __name__ == "__main__":
                         player.inventory,
                         external_inventory,
                     )
+                    
+            if event.type == pygame.MOUSEBUTTONUP:
+                mouse_down = False
 
             if event.type == pygame.KEYDOWN:
 
@@ -525,7 +516,7 @@ if __name__ == "__main__":
                     y += y_offset
                     if player.inventory[selection].item is not None:
                         entities.append(
-                            EntityItem(player.inventory[selection].item.name, (x, y), player.inventory[selection].item.type)
+                            EntityItem(f"Item {player.inventory[selection].item.name}", (x, y), player.inventory[selection].item.type)
                         )
                         player.inventory[selection].item.count -= 1
 
@@ -571,6 +562,7 @@ if __name__ == "__main__":
         for entity in entities:
             entity.script()
             if player.rect.colliderect(entity.rect):
+                entity.name = remove_prefix(entity.name, "Item ")
                 slot = find_slot(entity.name, player.inventory)
                 if slot is None:
                     pass
