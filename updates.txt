@@ -80,3 +80,4 @@ __2dminecraft-V-0.7.1__
     # white backgrounds in overlay folder are treated as transparent
     + block breaking assets added
     + block breaking time added
+    + block breaking animations (buggy)

@@ -29,12 +29,14 @@ from ui import (
 
 from pygame_tools import remove_prefix
 
+
 def loop(func, fps: int):
     def loop_func():
         clock = pygame.time.Clock()
         while run:
             clock.tick(fps)
             func()
+
     return loop_func
 
 
@@ -45,13 +47,7 @@ def generate_world(starting_x, ending_x):
         current_height = round(noise((x * terrain_smoothness, 0)) * terrain_variation)
         for y in range(current_height, current_height + 4):
             objects.append(
-                Block(
-                    x * block_size,
-                    y * block_size,
-                    block_size,
-                    "Stone",
-                    "rock"
-                )
+                Block(x * block_size, y * block_size, block_size, "Stone", "rock")
             )
         for y in range(current_height + 4, world_depth):
             if noise((x * cave_variation, y * cave_variation)) * cave_size < 0.5:
@@ -64,7 +60,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Coal Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 elif 0.04 < abs(
@@ -76,7 +72,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Copper Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 elif 0.09 < abs(
@@ -88,7 +84,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Iron Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 elif 0.11 < abs(
@@ -100,7 +96,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Diamond Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 elif 0.12 < abs(
@@ -112,7 +108,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Redstone Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 elif 0.15 < abs(
@@ -124,7 +120,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Lapis Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 elif 0.21 < abs(
@@ -136,7 +132,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Gold Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 elif 0.2 < abs(
@@ -148,27 +144,17 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Emerald Ore",
-                            "rock"
+                            "rock",
                         )
                     )
                 else:
                     objects.append(
                         Block(
-                            x * block_size,
-                            y * block_size,
-                            block_size,
-                            "Stone",
-                            "rock"
+                            x * block_size, y * block_size, block_size, "Stone", "rock"
                         )
                     )
         objects.append(
-            Block(
-                x * block_size,
-                64 * block_size,
-                block_size,
-                "Bedrock",
-                "rock"
-            )
+            Block(x * block_size, 64 * block_size, block_size, "Bedrock", "rock")
         )
         objects.append(
             Block(
@@ -176,7 +162,7 @@ def generate_world(starting_x, ending_x):
                 (current_height - 1) * block_size,
                 block_size,
                 "Dirt",
-                "soil"
+                "soil",
             )
         )
         objects.append(
@@ -185,18 +171,14 @@ def generate_world(starting_x, ending_x):
                 (current_height - 2) * block_size,
                 block_size,
                 "Grass",
-                "soil"
+                "soil",
             )
         )
         if randint(1, 7) == 1:
             for i in range(current_height - 5, current_height - 2):
                 objects.append(
                     Block(
-                        x * block_size,
-                        i * block_size,
-                        block_size,
-                        "Oak Wood",
-                        "wood"
+                        x * block_size, i * block_size, block_size, "Oak Wood", "wood"
                     )
                 )
             for i in range(current_height - 8, current_height - 5):
@@ -206,8 +188,7 @@ def generate_world(starting_x, ending_x):
                         i * block_size,
                         block_size,
                         "Oak Leaves",
-                        "plant"
-
+                        "plant",
                     )
                 )
                 objects.append(
@@ -216,7 +197,7 @@ def generate_world(starting_x, ending_x):
                         i * block_size,
                         block_size,
                         "Oak Leaves",
-                        "plant"
+                        "plant",
                     )
                 )
                 objects.append(
@@ -225,7 +206,7 @@ def generate_world(starting_x, ending_x):
                         i * block_size,
                         block_size,
                         "Oak Leaves",
-                        "plant"
+                        "plant",
                     )
                 )
     return objects
@@ -238,18 +219,21 @@ def setpos(pos):
     pos = x, y
     return pos
 
+
 def add_obj_as_entity(obj):
     entity_pos = (obj.rect.x + 4, obj.rect.y + 4)
     if obj.name == "Bedrock":
         return
     elif obj.name == "Stone":
-        entities.append(EntityItem("Item Cobblestone", entity_pos, "Block", "rock", None, 1))
+        entities.append(
+            EntityItem("Item Cobblestone", entity_pos, "Block", "rock", None, 1)
+        )
     elif obj.name == "Diamond Ore":
         entities.append(EntityItem("Item Diamond", entity_pos, "Item"))
     elif obj.name == "Iron Ore":
         entities.append(EntityItem("Item Raw Iron", entity_pos, "Item"))
     elif obj.name == "Redstone Ore":
-        entities.append(EntityItem("Item Redstone", entity_pos, "Item" ))
+        entities.append(EntityItem("Item Redstone", entity_pos, "Item"))
     elif obj.name == "Lapis Ore":
         entities.append(EntityItem("Item Lapis", entity_pos, "Item"))
     elif obj.name == "Emerald Ore":
@@ -261,7 +245,11 @@ def add_obj_as_entity(obj):
     elif obj.name == "Coal Ore":
         entities.append(EntityItem("Item Coal", entity_pos, "Item"))
     else:
-        entities.append(EntityItem(f"Item {obj.name}", entity_pos, "Block", break_time=obj.break_time))
+        entities.append(
+            EntityItem(
+                f"Item {obj.name}", entity_pos, "Block", break_time=obj.break_time
+            )
+        )
 
 
 def delete_block():
@@ -313,7 +301,8 @@ def right_click():
         y,
         block_size,
         player.inventory[selection].item.name,
-        player.inventory[selection].item.break_time
+        None,
+        player.inventory[selection].item.break_time,
     ]
     # placing block into correct chunk
     if floor((x // block_size) / chunck_size) != current_chunk:
@@ -373,6 +362,13 @@ def display():
         obj.render(window, x_offset, y_offset)
     for obj in chunk2:
         obj.render(window, x_offset, y_offset)
+    if target_obj is not None:
+        window.blit(
+            assets[
+                f"Block Break {max(min(round((time() - start_time + target_obj.break_time)// 6), 6), 1)}"
+            ],
+            (target_obj.rect.x - x_offset, target_obj.rect.y - y_offset),
+        )
     player.render(window, x_offset, y_offset)
     if world_type == "Horror":
         filter.fill(pygame.color.Color("Grey"))
@@ -439,6 +435,8 @@ if __name__ == "__main__":
     inv_view = False
 
     mouse_down = False
+
+    target_obj = None
 
     while run:
 
@@ -515,9 +513,10 @@ if __name__ == "__main__":
                         player.inventory,
                         external_inventory,
                     )
-                    
+
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_down = False
+                target_obj = None
 
             if event.type == pygame.KEYDOWN:
 
@@ -556,7 +555,12 @@ if __name__ == "__main__":
                     y += y_offset
                     if player.inventory[selection].item is not None:
                         entities.append(
-                            EntityItem(f"Item {player.inventory[selection].item.name}", (x, y), player.inventory[selection].item.type, break_time=player.inventory[selection].item.break_time)
+                            EntityItem(
+                                f"Item {player.inventory[selection].item.name}",
+                                (x, y),
+                                player.inventory[selection].item.type,
+                                break_time=player.inventory[selection].item.break_time,
+                            )
                         )
                         player.inventory[selection].item.count -= 1
 
@@ -607,7 +611,9 @@ if __name__ == "__main__":
                 if slot is None:
                     pass
                 elif player.inventory[slot].item is None:
-                    player.inventory[slot].item = Item(entity.name, entity.type, None, entity.break_time, entity.count)
+                    player.inventory[slot].item = Item(
+                        entity.name, entity.type, None, entity.break_time, entity.count
+                    )
                 else:
                     player.inventory[slot].item.count += entity.count
                 entities.remove(entity)
