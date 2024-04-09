@@ -72,8 +72,11 @@ __2dminecraft-V-0.7__
     + 1 new blocks
     + 8 new items
     # 1,185 lines of code!
+
+__2dminecraft-V-0.7.1__
     + better item hinting and world version listing
     + item smaller image (24x24) of there object
     + item bugs resolved
     # white backgrounds in overlay folder are treated as transparent
     + block breaking assets added
+    + block breaking time added

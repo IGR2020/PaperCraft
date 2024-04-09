@@ -18,6 +18,8 @@ from math import floor
 
 from menu import main_menu
 
+from time import time
+
 from ui import (
     render_ui,
     find_slot,
@@ -48,6 +50,7 @@ def generate_world(starting_x, ending_x):
                     y * block_size,
                     block_size,
                     "Stone",
+                    "rock"
                 )
             )
         for y in range(current_height + 4, world_depth):
@@ -61,6 +64,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Coal Ore",
+                            "rock"
                         )
                     )
                 elif 0.04 < abs(
@@ -72,6 +76,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Copper Ore",
+                            "rock"
                         )
                     )
                 elif 0.09 < abs(
@@ -83,6 +88,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Iron Ore",
+                            "rock"
                         )
                     )
                 elif 0.11 < abs(
@@ -94,6 +100,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Diamond Ore",
+                            "rock"
                         )
                     )
                 elif 0.12 < abs(
@@ -105,6 +112,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Redstone Ore",
+                            "rock"
                         )
                     )
                 elif 0.15 < abs(
@@ -116,6 +124,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Lapis Ore",
+                            "rock"
                         )
                     )
                 elif 0.21 < abs(
@@ -127,6 +136,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Gold Ore",
+                            "rock"
                         )
                     )
                 elif 0.2 < abs(
@@ -138,6 +148,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Emerald Ore",
+                            "rock"
                         )
                     )
                 else:
@@ -147,6 +158,7 @@ def generate_world(starting_x, ending_x):
                             y * block_size,
                             block_size,
                             "Stone",
+                            "rock"
                         )
                     )
         objects.append(
@@ -155,6 +167,7 @@ def generate_world(starting_x, ending_x):
                 64 * block_size,
                 block_size,
                 "Bedrock",
+                "rock"
             )
         )
         objects.append(
@@ -163,6 +176,7 @@ def generate_world(starting_x, ending_x):
                 (current_height - 1) * block_size,
                 block_size,
                 "Dirt",
+                "soil"
             )
         )
         objects.append(
@@ -171,6 +185,7 @@ def generate_world(starting_x, ending_x):
                 (current_height - 2) * block_size,
                 block_size,
                 "Grass",
+                "soil"
             )
         )
         if randint(1, 7) == 1:
@@ -181,6 +196,7 @@ def generate_world(starting_x, ending_x):
                         i * block_size,
                         block_size,
                         "Oak Wood",
+                        "wood"
                     )
                 )
             for i in range(current_height - 8, current_height - 5):
@@ -190,6 +206,8 @@ def generate_world(starting_x, ending_x):
                         i * block_size,
                         block_size,
                         "Oak Leaves",
+                        "plant"
+
                     )
                 )
                 objects.append(
@@ -198,6 +216,7 @@ def generate_world(starting_x, ending_x):
                         i * block_size,
                         block_size,
                         "Oak Leaves",
+                        "plant"
                     )
                 )
                 objects.append(
@@ -206,6 +225,7 @@ def generate_world(starting_x, ending_x):
                         i * block_size,
                         block_size,
                         "Oak Leaves",
+                        "plant"
                     )
                 )
     return objects
@@ -223,28 +243,34 @@ def add_obj_as_entity(obj):
     if obj.name == "Bedrock":
         return
     elif obj.name == "Stone":
-        entities.append(EntityItem("Item Cobblestone", entity_pos, "Block", 1))
+        entities.append(EntityItem("Item Cobblestone", entity_pos, "Block", "rock", None, 1))
     elif obj.name == "Diamond Ore":
-        entities.append(EntityItem("Item Diamond", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Diamond", entity_pos, "Item"))
     elif obj.name == "Iron Ore":
-        entities.append(EntityItem("Item Raw Iron", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Raw Iron", entity_pos, "Item"))
     elif obj.name == "Redstone Ore":
-        entities.append(EntityItem("Item Redstone", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Redstone", entity_pos, "Item" ))
     elif obj.name == "Lapis Ore":
-        entities.append(EntityItem("Item Lapis", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Lapis", entity_pos, "Item"))
     elif obj.name == "Emerald Ore":
-        entities.append(EntityItem("Item Emerald", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Emerald", entity_pos, "Item"))
     elif obj.name == "Gold Ore":
-        entities.append(EntityItem("Item Raw Gold", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Raw Gold", entity_pos, "Item"))
     elif obj.name == "Copper Ore":
-        entities.append(EntityItem("Item Raw Copper", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Raw Copper", entity_pos, "Item"))
     elif obj.name == "Coal Ore":
-        entities.append(EntityItem("Item Coal", entity_pos, "Item", 1))
+        entities.append(EntityItem("Item Coal", entity_pos, "Item"))
     else:
-        entities.append(EntityItem(f"Item {obj.name}", entity_pos, "Block", 1))
+        entities.append(EntityItem(f"Item {obj.name}", entity_pos, "Block", break_time=obj.break_time))
 
 
 def delete_block():
+    global target_obj
+    if target_obj is None:
+        return
+    current_time = time()
+    if not (current_time > start_time + target_obj.break_time and mouse_down):
+        return
     x, y = pygame.mouse.get_pos()
     x += x_offset
     y += y_offset
@@ -256,6 +282,7 @@ def delete_block():
         if obj.rect.collidepoint((x, y)):
             add_obj_as_entity(obj)
             chunk2.remove(obj)
+    target_obj = None
 
 
 # activated opon request to place block
@@ -286,6 +313,7 @@ def right_click():
         y,
         block_size,
         player.inventory[selection].item.name,
+        player.inventory[selection].item.break_time
     ]
     # placing block into correct chunk
     if floor((x // block_size) / chunck_size) != current_chunk:
@@ -394,7 +422,7 @@ if __name__ == "__main__":
         player = load_data(f"worlds\\{world_name}\\player data.pkl")
     else:
         player = Player(28, 56)
-        player.inventory[0].item = Item("Crafting Table", "Block")
+        player.inventory[0].item = Item("Crafting Table", "Block", "wood")
     x_offset, y_offset = read_pair(f"worlds\\{world_name}\\offsets.txt")
     current_chunk = 0
     closest_chunk = -1
@@ -451,6 +479,18 @@ if __name__ == "__main__":
                 mouse_down = True
                 if not inv_view:
                     if event.button == 1:
+                        start_time = time()
+                        x, y = pygame.mouse.get_pos()
+                        x += x_offset
+                        y += y_offset
+                        for obj in chunk1:
+                            if obj.rect.collidepoint((x, y)):
+                                target_obj = obj
+                                break
+                        else:
+                            for obj in chunk2:
+                                if obj.rect.collidepoint((x, y)):
+                                    target_obj = obj
                         delete_block()
                     if event.button == 3:
                         right_click()
@@ -516,7 +556,7 @@ if __name__ == "__main__":
                     y += y_offset
                     if player.inventory[selection].item is not None:
                         entities.append(
-                            EntityItem(f"Item {player.inventory[selection].item.name}", (x, y), player.inventory[selection].item.type)
+                            EntityItem(f"Item {player.inventory[selection].item.name}", (x, y), player.inventory[selection].item.type, break_time=player.inventory[selection].item.break_time)
                         )
                         player.inventory[selection].item.count -= 1
 
@@ -567,7 +607,7 @@ if __name__ == "__main__":
                 if slot is None:
                     pass
                 elif player.inventory[slot].item is None:
-                    player.inventory[slot].item = Item(entity.name, entity.type, entity.count)
+                    player.inventory[slot].item = Item(entity.name, entity.type, None, entity.break_time, entity.count)
                 else:
                     player.inventory[slot].item.count += entity.count
                 entities.remove(entity)
@@ -579,6 +619,9 @@ if __name__ == "__main__":
                 ):
                     entity.count += ent.count
                     entities.remove(ent)
+
+        if mouse_down:
+            delete_block()
 
         manage_collisions()
         maintain_inventory(
