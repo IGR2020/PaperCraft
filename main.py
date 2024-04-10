@@ -5,7 +5,7 @@ from threading import Thread
 from random import randint
 
 from player import Player
-from objects import Block, Item, CraftingTable, Chest, EntityItem
+from objects import Block, Item, CraftingTable, Chest, EntityItem, get_break_bonus
 
 from perlin_noise import PerlinNoise
 from constants import *
@@ -257,7 +257,7 @@ def delete_block():
     if target_obj is None:
         return
     current_time = time()
-    if not (current_time > start_time + target_obj.break_time and mouse_down):
+    if not (current_time > start_time + target_obj.break_time + break_bonus and mouse_down):
         return
     x, y = pygame.mouse.get_pos()
     x += x_offset
@@ -292,7 +292,7 @@ def right_click():
         return
     if player.rect.collidepoint((x, y)):
         return
-    if player.inventory[selection].item.type == "Item":
+    if player.inventory[selection].item.type != "Block":
         return
     # placing block
     x, y = setpos((x, y))
@@ -365,7 +365,7 @@ def display():
     if target_obj is not None:
         window.blit(
             assets[
-                f"Block Break {max(min(round(6-((start_time + target_obj.break_time-time())/ (target_obj.break_time / 6))), 6), 1)}"
+                f"Block Break {max(min(round(6-((start_time + target_obj.break_time + break_bonus - time())/ ((target_obj.break_time + break_bonus) / 6))), 6), 1)}"
             ],
             (target_obj.rect.x - x_offset, target_obj.rect.y - y_offset),
         )
@@ -461,6 +461,7 @@ if __name__ == "__main__":
     mouse_down = False
 
     target_obj = None
+    break_bonus = 0
 
     # making functions into loops
     display = loop(display, 60)
@@ -520,11 +521,15 @@ if __name__ == "__main__":
                         for obj in chunk1:
                             if obj.rect.collidepoint((x, y)):
                                 target_obj = obj
+                                if player.inventory[selection].item is not None:
+                                    break_bonus = get_break_bonus(player.inventory[selection].item.name, target_obj.category)
                                 break
                         else:
                             for obj in chunk2:
                                 if obj.rect.collidepoint((x, y)):
                                     target_obj = obj
+                                    if player.inventory[selection].item is not None:
+                                        break_bonus = get_break_bonus(player.inventory[selection].item.name, target_obj.category)
                         delete_block()
                     if event.button == 3:
                         right_click()

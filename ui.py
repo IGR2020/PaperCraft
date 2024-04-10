@@ -35,7 +35,13 @@ def maintain_slots(inventory, max_stack_size=64):
         if index is None:
             continue
         elif inventory[index].item is None:
-            inventory[index].item = Item(button.item.name, button.item.type, None, button.item.break_time, button.item.count)
+            inventory[index].item = Item(
+                button.item.name,
+                button.item.type,
+                None,
+                button.item.break_time,
+                button.item.count,
+            )
             inventory[index].item.count -= max_stack_size
         else:
             inventory[index].item.count += button.item.count - max_stack_size
@@ -126,11 +132,15 @@ def manage_inventory(
                 if held.item is None and slot.item is None:
                     return
                 elif held.item is None and slot.item is not None:
-                    held.item = Item(slot.item.name, slot.item.type, None, slot.item.break_time, 0)
+                    held.item = Item(
+                        slot.item.name, slot.item.type, None, slot.item.break_time, 0
+                    )
                     held.item.count += slot.item.count // 2
                     slot.item.count -= slot.item.count // 2
                 elif held.item is not None and slot.item is None:
-                    slot.item = Item(held.item.name, held.item.type, None, held.item.break_time, 0)
+                    slot.item = Item(
+                        held.item.name, held.item.type, None, held.item.break_time, 0
+                    )
                     held.item.count -= 1
                     slot.item.count += 1
                 elif held.item.name == slot.item.name:
@@ -143,7 +153,7 @@ def manage_inventory(
 
 def craft(external_inventory):
     recipe_components = []
-    # recipe component index corredponding to recipe components
+    # recipe component index corredponding to "wood",recipe components
     rci = []
     for i, slot in enumerate(external_inventory):
         if slot.item is not None:
@@ -152,31 +162,39 @@ def craft(external_inventory):
     if len(recipe_components) < 1:
         return (None, None)
     elif recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
-        return (Item("Oak Planks", "Block", None, "wood", 4), recipe_components)
+        return (Item("Oak Planks", "Block", "wood", None, 4), recipe_components)
     elif (
         recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"]
         and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
     ):
-        return (Item("Crafting Table", "Block", None, "wood", 1), recipe_components)
+        return (Item("Crafting Table", "Block", "wood", None, 1), recipe_components)
     elif (
         recipe_components == ["Stone", "Stone", "Stone", "Stone"]
         and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
     ):
-        return (Item("Stone Brick", "Block", None, "rock", 4), recipe_components)
+        return (Item("Stone Brick", "Block", "rock", None, 4), recipe_components)
     elif (
         len(recipe_components) == 8
         and rci == [0, 1, 2, 3, 5, 6, 7, 8]
         and "Oak Planks" in recipe_components
         and len(set(recipe_components)) == 1
     ):
-        return (Item("Chest", "Block", None, "wood", 1), recipe_components)
+        return (Item("Chest", "Block", "wood", None, 1), recipe_components)
     elif (
         len(set(recipe_components)) == 1
         and "Oak Planks" in recipe_components
         and len(recipe_components) == 2
         and rci[0] + 3 == rci[1]
     ):
-        return (Item("Stick", "Item", count=1), recipe_components)
+        return (Item("Stick", "Item", count=4), recipe_components)
+    elif rci == [1, 4, 6, 7, 8] and recipe_components == [
+        "Stick",
+        "Stick",
+        "Oak Planks",
+        "Oak Planks",
+        "Oak Planks",
+    ]:
+        return (Item("Wood Pickaxe", "Tool", count=1), recipe_components)
     else:
         return (None, None)
 

@@ -12,6 +12,14 @@ def get_break_time(category):
         return 10
     elif category == "plant":
         return 0.3
+    else:
+        return 0
+    
+def get_break_bonus(tool_name, category):
+    if tool_name == "Wood Pickaxe" and category == "rock":
+        return -8
+    else:
+        return 0
 
 
 class Object:
@@ -27,10 +35,11 @@ class Object:
 class Block(Object):
     def __init__(self, x, y, size, name, category=None, break_time=None):
         super().__init__(x, y, size, size, name)
-        if category is None:
+        if break_time is not None:
             self.break_time = break_time
         else:
             self.break_time = get_break_time(category)
+        self.category = category
 
 
 class Item:
