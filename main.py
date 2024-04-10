@@ -365,7 +365,7 @@ def display():
     if target_obj is not None:
         window.blit(
             assets[
-                f"Block Break {max(min(round((time() - start_time + target_obj.break_time)// 6), 6), 1)}"
+                f"Block Break {max(min(round(6-((start_time + target_obj.break_time-time())/ (target_obj.break_time / 6))), 6), 1)}"
             ],
             (target_obj.rect.x - x_offset, target_obj.rect.y - y_offset),
         )

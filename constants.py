@@ -43,6 +43,7 @@ for i in items:
 assets.update(other_assets)
 overlays = load_assets("assets\\Overlay")
 for i in overlays:
+    overlays[i].set_colorkey((255, 255, 255))
     assets[i] = overlays[i]
 del other_assets
 del overlays
