@@ -318,6 +318,7 @@ def right_click():
         if player.inventory[selection].item.name == "Crafting Table":
             chunk1.append(CraftingTable(*normal_args))
         elif player.inventory[selection].item.name == "Chest":
+            print(normal_args)
             chunk1.append(Chest(*normal_args))
         else:
             chunk1.append(Block(*normal_args))

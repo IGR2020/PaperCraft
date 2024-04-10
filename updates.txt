@@ -82,3 +82,4 @@ __2dminecraft-V-0.7.1__
     + block breaking time added
     + block breaking animations
     + multi thread processing
+    + bug fixes

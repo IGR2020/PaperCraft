@@ -70,7 +70,7 @@ class CraftingTable(Block):
 
 class Chest(Block):
     def __init__(self, x, y, size, name, category=None, break_time=None):
-        super().__init__(name, x, y, size, name, category, break_time)
+        super().__init__(x, y, size, name, category, break_time)
         self.inventory = []
         for j in range(9, 3, -1):
             for i in range(13, 17):
