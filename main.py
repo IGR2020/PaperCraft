@@ -350,7 +350,6 @@ def manage_collisions():
         for entity in entities:
             entity.solve_collision(obj)
 
-
 def display():
     if world_type == "Horror":
         window.fill(horror_bg_color)
@@ -389,6 +388,30 @@ def display():
         selection,
     )
     pygame.display.update()
+
+def update_items():
+    # checking for entity collision
+    for entity in entities:
+        if player.rect.colliderect(entity.rect):
+            entity.name = remove_prefix(entity.name, "Item ")
+            slot = find_slot(entity.name, player.inventory)
+            if slot is None:
+                pass
+            elif player.inventory[slot].item is None:
+                player.inventory[slot].item = Item(
+                    entity.name, entity.type, None, entity.break_time, entity.count
+                )
+            else:
+                player.inventory[slot].item.count += entity.count
+            entities.remove(entity)
+        for ent in entities:
+            if (
+                ent.rect.colliderect(entity)
+                and ent.name == entity.name
+                and id(ent) != id(entity)
+            ):
+                entity.count += ent.count
+                entities.remove(ent)
 
 
 if __name__ == "__main__":
@@ -437,6 +460,18 @@ if __name__ == "__main__":
     mouse_down = False
 
     target_obj = None
+
+    # making functions into loops
+    display = loop(display, 60)
+    update_items = loop(update_items, 20)
+
+    # display thread
+    display_thread = Thread(target=display)
+    display_thread.start()
+
+    # item updates thread
+    update_items_thread = Thread(target=update_items)
+    update_items_thread.start()
 
     while run:
 
@@ -602,38 +637,15 @@ if __name__ == "__main__":
                 save_data(chunk1, f"worlds\\{world_name}\\{current_chunk}.pkl")
             swap = True
 
-        # checking for entity collision
-        for entity in entities:
-            entity.script()
-            if player.rect.colliderect(entity.rect):
-                entity.name = remove_prefix(entity.name, "Item ")
-                slot = find_slot(entity.name, player.inventory)
-                if slot is None:
-                    pass
-                elif player.inventory[slot].item is None:
-                    player.inventory[slot].item = Item(
-                        entity.name, entity.type, None, entity.break_time, entity.count
-                    )
-                else:
-                    player.inventory[slot].item.count += entity.count
-                entities.remove(entity)
-            for ent in entities:
-                if (
-                    ent.rect.colliderect(entity)
-                    and ent.name == entity.name
-                    and id(ent) != id(entity)
-                ):
-                    entity.count += ent.count
-                    entities.remove(ent)
-
         if mouse_down:
             delete_block()
 
+        for entity in entities:
+            entity.script()
         manage_collisions()
         maintain_inventory(
             player.inventory, player.held, external_inventory, result_inventory
         )
         player.script([*chunk1, *chunk2])
-        display()
 
     pygame.quit()

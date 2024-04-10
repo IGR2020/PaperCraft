@@ -98,7 +98,6 @@ class EntityItem:
     def script(self):
         self.y_vel += item_fall_speed
         self.rect.y += self.y_vel
-
     def solve_collision(self, obj):
         if self.rect.colliderect(obj.rect):
             if self.y_vel > 0:
