@@ -410,10 +410,11 @@ def update_items():
                 pass
             elif player.inventory[slot].item is None:
                 player.inventory[slot].item = Item(
-                    entity.name, entity.type, entity.category, entity.break_time, entity.count
+                    entity.name, entity.type, entity.category, entity.break_time, entity.count, entity.durability
                 )
             else:
                 player.inventory[slot].item.count += entity.count
+                player.inventory[slot].item.durability = (player.inventory[slot].item.durability + entity.durability) / 2
             entities.remove(entity)
         for ent in entities:
             if (
@@ -422,6 +423,7 @@ def update_items():
                 and id(ent) != id(entity)
             ):
                 entity.count += ent.count
+                entity.durability = (entity.durability + ent.durability) / 2
                 entities.remove(ent)
 
 
@@ -613,6 +615,7 @@ if __name__ == "__main__":
                                 player.inventory[selection].item.type,
                                 category=player.inventory[selection].item.category,
                                 break_time=player.inventory[selection].item.break_time,
+                                durability=player.inventory[selection].item.durability
                             )
                         )
                         player.inventory[selection].item.count -= 1

@@ -73,6 +73,8 @@ class Item:
         self.max_durability = durability
 
     def display(self, rect, window):
+        if self.durability > self.max_durability:
+            self.durability = self.max_durability
         if self.durability < 1:
             self.count -= 1
             self.durability = self.max_durability
@@ -133,7 +135,7 @@ class Chest(Block):
 
 
 class EntityItem:
-    def __init__(self, name, pos, type, category=None, break_time=None, count=1):
+    def __init__(self, name, pos, type, category=None, break_time=None, count=1, durability=16):
         self.name = name
         self.rect = assets[name].get_rect(topleft=pos)
         self.y_vel = 0
@@ -144,6 +146,9 @@ class EntityItem:
         else:
             self.break_time = get_break_time(category)
         self.category = category
+        self.durability = durability
+        self.max_durability = durability
+
 
     def display(self, screen: pygame.Surface, x_offset, y_offset):
         screen.blit(assets[self.name], (self.rect.x - x_offset, self.rect.y - y_offset))
