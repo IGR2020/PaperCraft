@@ -84,3 +84,4 @@ __2dminecraft-V-0.7.1__
     + multi thread processing
     + bug fixes
     + tools
+    + smelting

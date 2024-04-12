@@ -5,7 +5,7 @@ from threading import Thread
 from random import randint
 
 from player import Player
-from objects import Block, Item, CraftingTable, Chest, EntityItem, get_break_bonus
+from objects import Block, Item, CraftingTable, Chest, EntityItem, get_break_bonus, Furnace
 
 from perlin_noise import PerlinNoise
 from constants import *
@@ -247,7 +247,7 @@ def add_obj_as_entity(obj):
     else:
         entities.append(
             EntityItem(
-                f"Item {obj.name}", entity_pos, "Block", break_time=obj.break_time
+                f"Item {obj.name}", entity_pos, "Block", category=obj.category, break_time=obj.break_time
             )
         )
 
@@ -301,7 +301,7 @@ def right_click():
         y,
         block_size,
         player.inventory[selection].item.name,
-        None,
+        player.inventory[selection].item.category,
         player.inventory[selection].item.break_time,
     ]
     # placing block into correct chunk
@@ -311,6 +311,8 @@ def right_click():
             chunk2.append(CraftingTable(*normal_args))
         elif player.inventory[selection].item.name == "Chest":
             chunk2.append(Chest(*normal_args))
+        elif player.inventory[selection].item.name == "Furnace":
+            chunk2.append(Furnace(*normal_args))
         else:
             chunk2.append(Block(*normal_args))
     else:
@@ -318,24 +320,30 @@ def right_click():
         if player.inventory[selection].item.name == "Crafting Table":
             chunk1.append(CraftingTable(*normal_args))
         elif player.inventory[selection].item.name == "Chest":
-            print(normal_args)
             chunk1.append(Chest(*normal_args))
+        elif player.inventory[selection].item.name == "Furnace":
+            chunk2.append(Furnace(*normal_args))
         else:
             chunk1.append(Block(*normal_args))
     player.inventory[selection].item.count -= 1
 
 
 def interact(obj):
-    global external_inventory, inv_view, external_inventory_type, result_inventory
+    global external_inventory, inv_view, external_inventory_type, result_inventory, smelt_time, current_selected_object
     if obj.name == "Crafting Table":
         external_inventory = obj.inventory
         inv_view = True
         external_inventory_type = "Crafting"
         result_inventory = obj.result_inventory
-    if obj.name == "Chest":
+    elif obj.name == "Chest":
         external_inventory = obj.inventory
         inv_view = True
         external_inventory_type = "Chest"
+        result_inventory = obj.result_inventory
+    elif obj.name == "Furnace":
+        external_inventory = obj.inventory
+        inv_view = True
+        external_inventory_type = "Furnace"
         result_inventory = obj.result_inventory
 
 
@@ -400,7 +408,7 @@ def update_items():
                 pass
             elif player.inventory[slot].item is None:
                 player.inventory[slot].item = Item(
-                    entity.name, entity.type, None, entity.break_time, entity.count
+                    entity.name, entity.type, entity.category, entity.break_time, entity.count
                 )
             else:
                 player.inventory[slot].item.count += entity.count
@@ -552,12 +560,13 @@ if __name__ == "__main__":
                         result_inventory,
                         external_inventory_type,
                         player.inventory,
-                        external_inventory,
+                        external_inventory
                     )
 
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_down = False
                 target_obj = None
+                break_bonus = 0
 
             if event.type == pygame.KEYDOWN:
 
@@ -600,6 +609,7 @@ if __name__ == "__main__":
                                 f"Item {player.inventory[selection].item.name}",
                                 (x, y),
                                 player.inventory[selection].item.type,
+                                category=player.inventory[selection].item.category,
                                 break_time=player.inventory[selection].item.break_time,
                             )
                         )

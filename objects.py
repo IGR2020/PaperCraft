@@ -14,12 +14,29 @@ def get_break_time(category):
         return 0.3
     else:
         return 0
-    
+
+
 def get_break_bonus(tool_name, category):
     if tool_name == "Wood Pickaxe" and category == "rock":
         return -8
+    elif tool_name == "Stone Pickaxe" and category == "rock":
+        return -9
+    elif tool_name == "Iron Pickaxe" and category == "rock":
+        return -9.5
+    elif tool_name == "Diamond Pickaxe" and category == "rock":
+        return -9.7
     else:
         return 0
+    
+def get_fuel(fuel_name):
+    if fuel_name == "Oak Planks":
+        return 1
+    if fuel_name == "Oak Wood":
+        return 4.5
+    if fuel_name == "Coal":
+        return 8
+    else:
+        return 1
 
 
 class Object:
@@ -43,7 +60,7 @@ class Block(Object):
 
 
 class Item:
-    def __init__(self, name, type, category=None, break_time=None, count=1) -> None:
+    def __init__(self, name, type, category=None, break_time=None, count=1, durability=100) -> None:
         self.name = name
         self.count = count
         self.type = type
@@ -51,6 +68,8 @@ class Item:
             self.break_time = break_time
         else:
             self.break_time = get_break_time(category)
+        self.category = category
+        self.durability = durability
 
     def display(self, rect, window):
         window.blit(assets[self.name], (rect.x + 8, rect.y + 8))
@@ -77,6 +96,21 @@ class CraftingTable(Block):
         ]
 
 
+class Furnace(Block):
+    def __init__(self, x, y, size, name, category=None, break_time=None):
+        super().__init__(x, y, size, name, category, break_time)
+        self.inventory = [
+            Slot((14 * slot_size, 7 * slot_size), None, "Slot"),
+            Slot((14 * slot_size, 9 * slot_size), None, "Slot"),
+        ]
+        self.result_inventory = [
+            Slot((14 * slot_size, 5 * slot_size), None, "Slot"),
+            Slot((14 * slot_size, 6 * slot_size), None, "Arrow"),
+        ]
+        # items the block can smelt
+        self.fuel = 0
+
+
 class Chest(Block):
     def __init__(self, x, y, size, name, category=None, break_time=None):
         super().__init__(x, y, size, name, category, break_time)
@@ -100,6 +134,7 @@ class EntityItem:
             self.break_time = break_time
         else:
             self.break_time = get_break_time(category)
+        self.category = category
 
     def display(self, screen: pygame.Surface, x_offset, y_offset):
         screen.blit(assets[self.name], (self.rect.x - x_offset, self.rect.y - y_offset))
@@ -107,6 +142,7 @@ class EntityItem:
     def script(self):
         self.y_vel += item_fall_speed
         self.rect.y += self.y_vel
+
     def solve_collision(self, obj):
         if self.rect.colliderect(obj.rect):
             if self.y_vel > 0:

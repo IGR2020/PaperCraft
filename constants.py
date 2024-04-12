@@ -1,9 +1,8 @@
-import os
 import pygame
 from pygame_tools import load_assets
 
 WIDTH, HEIGHT = 900, 500
-window = pygame.display.set_mode((WIDTH, HEIGHT))
+window = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Paper craft")
 
 FPS = 60

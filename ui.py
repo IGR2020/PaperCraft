@@ -2,7 +2,8 @@ import pygame
 from objects import Item
 from pygame_tools import blit_text
 from constants import block_size, assets
-
+from workbench import craft, smelt
+from time import time
 
 # finds available or matching slots for an item
 def find_slot(item_name, inventory, max_stack_count=64, avail_count_needed=1):
@@ -38,7 +39,7 @@ def maintain_slots(inventory, max_stack_size=64):
             inventory[index].item = Item(
                 button.item.name,
                 button.item.type,
-                None,
+                button.item.category,
                 button.item.break_time,
                 button.item.count,
             )
@@ -133,13 +134,13 @@ def manage_inventory(
                     return
                 elif held.item is None and slot.item is not None:
                     held.item = Item(
-                        slot.item.name, slot.item.type, None, slot.item.break_time, 0
+                        slot.item.name, slot.item.type, slot.item.category, slot.item.break_time, 0
                     )
                     held.item.count += slot.item.count // 2
                     slot.item.count -= slot.item.count // 2
                 elif held.item is not None and slot.item is None:
                     slot.item = Item(
-                        held.item.name, held.item.type, None, held.item.break_time, 0
+                        held.item.name, held.item.type, held.item.category, held.item.break_time, 0
                     )
                     held.item.count -= 1
                     slot.item.count += 1
@@ -149,54 +150,6 @@ def manage_inventory(
                 else:
                     held.item, slot.item = slot.item, held.item
                 return
-
-
-def craft(external_inventory):
-    recipe_components = []
-    # recipe component index corredponding to "wood",recipe components
-    rci = []
-    for i, slot in enumerate(external_inventory):
-        if slot.item is not None:
-            recipe_components.append(slot.item.name)
-            rci.append(i)
-    if len(recipe_components) < 1:
-        return (None, None)
-    elif recipe_components[0] == "Oak Wood" and len(recipe_components) == 1:
-        return (Item("Oak Planks", "Block", "wood", None, 4), recipe_components)
-    elif (
-        recipe_components == ["Oak Planks", "Oak Planks", "Oak Planks", "Oak Planks"]
-        and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
-    ):
-        return (Item("Crafting Table", "Block", "wood", None, 1), recipe_components)
-    elif (
-        recipe_components == ["Stone", "Stone", "Stone", "Stone"]
-        and rci[0] + 4 == rci[1] + 3 == rci[2] + 1 == rci[3]
-    ):
-        return (Item("Stone Brick", "Block", "rock", None, 4), recipe_components)
-    elif (
-        len(recipe_components) == 8
-        and rci == [0, 1, 2, 3, 5, 6, 7, 8]
-        and "Oak Planks" in recipe_components
-        and len(set(recipe_components)) == 1
-    ):
-        return (Item("Chest", "Block", "wood", None, 1), recipe_components)
-    elif (
-        len(set(recipe_components)) == 1
-        and "Oak Planks" in recipe_components
-        and len(recipe_components) == 2
-        and rci[0] + 3 == rci[1]
-    ):
-        return (Item("Stick", "Item", count=4), recipe_components)
-    elif rci == [1, 4, 6, 7, 8] and recipe_components == [
-        "Stick",
-        "Stick",
-        "Oak Planks",
-        "Oak Planks",
-        "Oak Planks",
-    ]:
-        return (Item("Wood Pickaxe", "Tool", count=1), recipe_components)
-    else:
-        return (None, None)
 
 
 def manage_all_inventories(
@@ -244,3 +197,37 @@ def manage_all_inventories(
                 result_inventory[1].item = None
     elif external_inventory_type == "Chest":
         return
+    elif external_inventory_type == "Furnace":
+        item, fuel_used = smelt(external_inventory)
+        if item is not None:
+            if result_inventory[0].item is None:
+                result_inventory[0].item = item
+            elif item.name == result_inventory[0].item.name:
+                result_inventory[0].item.count += item.count
+            external_inventory[0].item.count -= 1
+        if fuel_used is not None:
+            external_inventory[1].item.durability /= fuel_used
+        x, y = pygame.mouse.get_pos()
+        if result_inventory[0].rect.collidepoint((x, y)):
+            if event.button == 1:
+                if held.item is None:
+                    held.item = result_inventory[0].item
+                elif result_inventory[0].item is not None:
+                    if held.item.name == result_inventory[0].item.name:
+                        held.item.count += result_inventory[0].item.count
+                result_inventory[0].item = None
+            elif event.button == 3:
+                slot_index = find_slot(result_inventory[0].item.name, inventory)
+                if (
+                    inventory[slot_index].item is not None
+                    and result_inventory[0].item is not None
+                ):
+                    inventory[slot_index].item.count += result_inventory[0].item.count
+                if inventory[slot_index].item is None:
+                    inventory[slot_index].item = result_inventory[0].item
+                result_inventory[0].item = None
+        return
+        
+        
+        
+        
