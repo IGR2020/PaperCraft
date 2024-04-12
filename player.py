@@ -45,6 +45,7 @@ class Player(pygame.sprite.Sprite):
                     self.rect.right = obj.rect.left
                 elif self.x_vel < 0:
                     self.rect.left = obj.rect.right
+                self.jump()
         self.x_vel = 0
 
     def move_left(self):
@@ -58,4 +59,4 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         if self.jump_count == 0:
             self.jump_count += 1
-            self.y_vel = -5
+            self.y_vel = -4

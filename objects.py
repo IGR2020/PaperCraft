@@ -60,7 +60,7 @@ class Block(Object):
 
 
 class Item:
-    def __init__(self, name, type, category=None, break_time=None, count=1, durability=16) -> None:
+    def __init__(self, name, type, category=None, break_time=None, count=1, durability=16, max_durability=None) -> None:
         self.name = name
         self.count = count
         self.type = type
@@ -70,7 +70,10 @@ class Item:
             self.break_time = get_break_time(category)
         self.category = category
         self.durability = durability
-        self.max_durability = durability
+        if max_durability is None:
+            self.max_durability = durability
+        else:
+            self.max_durability = max_durability
 
     def display(self, rect, window):
         if self.durability > self.max_durability:
@@ -135,7 +138,7 @@ class Chest(Block):
 
 
 class EntityItem:
-    def __init__(self, name, pos, type, category=None, break_time=None, count=1, durability=16):
+    def __init__(self, name, pos, type, category=None, break_time=None, count=1, durability=16, max_durability=None):
         self.name = name
         self.rect = assets[name].get_rect(topleft=pos)
         self.y_vel = 0
@@ -147,7 +150,10 @@ class EntityItem:
             self.break_time = get_break_time(category)
         self.category = category
         self.durability = durability
-        self.max_durability = durability
+        if max_durability is None:
+            self.max_durability = durability
+        else:
+            self.max_durability = max_durability
 
 
     def display(self, screen: pygame.Surface, x_offset, y_offset):

@@ -262,14 +262,11 @@ def delete_block():
     x, y = pygame.mouse.get_pos()
     x += x_offset
     y += y_offset
-    for obj in chunk1:
-        if obj.rect.collidepoint((x, y)):
-            add_obj_as_entity(obj)
-            chunk1.remove(obj)
-    for obj in chunk2:
-        if obj.rect.collidepoint((x, y)):
-            add_obj_as_entity(obj)
-            chunk2.remove(obj)
+    try:
+        chunk1.remove(target_obj)
+    except ValueError:
+        chunk2.remove(target_obj)
+    add_obj_as_entity(target_obj)
     if player.inventory[selection].item is not None:
         player.inventory[selection].item.durability -= 1
     target_obj = None
@@ -410,11 +407,12 @@ def update_items():
                 pass
             elif player.inventory[slot].item is None:
                 player.inventory[slot].item = Item(
-                    entity.name, entity.type, entity.category, entity.break_time, entity.count, entity.durability
+                    entity.name, entity.type, entity.category, entity.break_time, entity.count, entity.durability, entity.max_durability
                 )
             else:
                 player.inventory[slot].item.count += entity.count
                 player.inventory[slot].item.durability = (player.inventory[slot].item.durability + entity.durability) / 2
+                player.inventory[slot].item.max_durability = entity.max_durability
             entities.remove(entity)
         for ent in entities:
             if (
@@ -474,6 +472,8 @@ if __name__ == "__main__":
 
     target_obj = None
     break_bonus = 0
+
+    player.inventory[0].item = Item("Diamond", "Item", count=64)
 
     # making functions into loops
     display = loop(display, 60)
@@ -615,7 +615,8 @@ if __name__ == "__main__":
                                 player.inventory[selection].item.type,
                                 category=player.inventory[selection].item.category,
                                 break_time=player.inventory[selection].item.break_time,
-                                durability=player.inventory[selection].item.durability
+                                durability=player.inventory[selection].item.durability,
+                                max_durability=player.inventory[selection].item.max_durability
                             )
                         )
                         player.inventory[selection].item.count -= 1

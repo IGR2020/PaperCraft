@@ -52,7 +52,7 @@ def craft(external_inventory):
         "Oak Planks",
         "Oak Planks",
     ]:
-        return (Item("Wood Pickaxe", "Tool", count=1), recipe_components)
+        return (Item("Wood Pickaxe", "Tool", count=1, durability=32), recipe_components)
     elif rci == [1, 4, 6, 7, 8] and recipe_components == [
         "Stick",
         "Stick",
@@ -60,7 +60,7 @@ def craft(external_inventory):
         "Cobblestone",
         "Cobblestone",
     ]:
-        return (Item("Stone Pickaxe", "Tool", count=1), recipe_components)
+        return (Item("Stone Pickaxe", "Tool", count=1, durability=96), recipe_components)
     elif rci == [1, 4, 6, 7, 8] and recipe_components == [
         "Stick",
         "Stick",
@@ -68,15 +68,15 @@ def craft(external_inventory):
         "Iron Ingot",
         "Iron Ingot",
     ]:
-        return (Item("Iron Pickaxe", "Tool", count=1), recipe_components)
+        return (Item("Iron Pickaxe", "Tool", count=1, durability=182), recipe_components)
     elif rci == [1, 4, 6, 7, 8] and recipe_components == [
         "Stick",
         "Stick",
-        "Oak Planks",
-        "Oak Planks",
-        "Oak Planks",
+        "Diamond",
+        "Diamond",
+        "Diamond",
     ]:
-        return (Item("Wood Pickaxe", "Tool", count=1), recipe_components)
+        return (Item("Diamond Pickaxe", "Tool", count=1, durability=320), recipe_components)
     else:
         return (None, None)
 

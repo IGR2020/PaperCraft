@@ -85,3 +85,5 @@ __2dminecraft-V-0.7.1__
     + bug fixes
     + tools
     + smelting
+    + auto jumping
+    + durability
