@@ -270,6 +270,8 @@ def delete_block():
         if obj.rect.collidepoint((x, y)):
             add_obj_as_entity(obj)
             chunk2.remove(obj)
+    if player.inventory[selection].item is not None:
+        player.inventory[selection].item.durability -= 1
     target_obj = None
 
 
@@ -665,3 +667,4 @@ if __name__ == "__main__":
         player.script([*chunk1, *chunk2])
 
     pygame.quit()
+    quit()

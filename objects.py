@@ -60,7 +60,7 @@ class Block(Object):
 
 
 class Item:
-    def __init__(self, name, type, category=None, break_time=None, count=1, durability=100) -> None:
+    def __init__(self, name, type, category=None, break_time=None, count=1, durability=16) -> None:
         self.name = name
         self.count = count
         self.type = type
@@ -70,15 +70,24 @@ class Item:
             self.break_time = get_break_time(category)
         self.category = category
         self.durability = durability
+        self.max_durability = durability
 
     def display(self, rect, window):
+        if self.durability < 1:
+            self.count -= 1
+            self.durability = self.max_durability
         window.blit(assets[self.name], (rect.x + 8, rect.y + 8))
+        if self.durability != self.max_durability:
+            durability_rect = pygame.Rect(rect.x + 8, rect.y + 32, 32*(self.durability/self.max_durability), 5)
+            pygame.draw.rect(window, (255 * (1 - self.durability/self.max_durability), 255 * (self.durability/self.max_durability), 0), durability_rect)
         blit_text(
             window,
             str(self.count),
             (rect.x + 9, rect.y + 9),
             size=15,
         )
+        
+        
 
 
 class CraftingTable(Block):
