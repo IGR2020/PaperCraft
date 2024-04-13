@@ -83,7 +83,7 @@ class Item:
             self.durability = self.max_durability
         window.blit(assets[self.name], (rect.x + 8, rect.y + 8))
         if self.durability != self.max_durability:
-            durability_rect = pygame.Rect(rect.x + 8, rect.y + 32, 32*(self.durability/self.max_durability), 5)
+            durability_rect = pygame.Rect(rect.x + 10, rect.y + 32, 28*(self.durability/self.max_durability), 3)
             pygame.draw.rect(window, (255 * (1 - self.durability/self.max_durability), 255 * (self.durability/self.max_durability), 0), durability_rect)
         blit_text(
             window,

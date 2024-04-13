@@ -31,7 +31,7 @@ chunck_size = 64
 world_height = -64
 world_depth = 64
 
-VERSION = "0.7.1.9b"
+VERSION = "0.8.0.3b"
 
 # loading all assets and merging into a single dict
 assets = load_assets("assets\\Blocks", (block_size, block_size))

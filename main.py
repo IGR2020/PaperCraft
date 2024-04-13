@@ -426,6 +426,7 @@ def update_items():
 
 
 if __name__ == "__main__":
+
     # main menu and getting information
     world_name, world_type = main_menu()
 
@@ -473,7 +474,7 @@ if __name__ == "__main__":
     target_obj = None
     break_bonus = 0
 
-    player.inventory[0].item = Item("Diamond", "Item", count=64)
+    key_space = 0 # mesures time bettween key presses of the same key used for sprinting
 
     # making functions into loops
     display = loop(display, 60)
@@ -621,11 +622,18 @@ if __name__ == "__main__":
                         )
                         player.inventory[selection].item.count -= 1
 
+                if event.key in (pygame.K_a, pygame.K_d):
+                    if time() - key_space < 0.5:
+                        player.is_sprinting = True
+                    key_space = time()
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
             player.move_left()
-        if keys[pygame.K_a]:
+        elif keys[pygame.K_a]:
             player.move_right()
+        else:
+            player.is_sprinting = False
 
         if (
             player.rect.right - x_offset >= WIDTH - scroll_area and player.x_vel > 0
