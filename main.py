@@ -399,7 +399,7 @@ def display():
         inv_view,
         selection,
     )
-    render_health(window, player.health)
+    render_health(window, player.health, inv_view)
     pygame.display.update()
 
 def update_items():

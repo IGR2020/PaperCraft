@@ -77,6 +77,54 @@ def craft(external_inventory):
         "Diamond",
     ]:
         return (Item("Diamond Pickaxe", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 4, 6, 7, 8] and recipe_components == [
+        "Stick",
+        "Stick",
+        "Gold Ingot",
+        "Gold Ingot",
+        "Gold Ingot",
+    ]:
+        return (Item("Gold Pickaxe", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 3, 4, 6, 7] and recipe_components == [
+        "Stick",
+        "Diamond",
+        "Stick",
+        "Diamond",
+        "Diamond",
+    ]:
+        return (Item("Diamond Axe", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 3, 4, 6, 7] and recipe_components == [
+        "Stick",
+        "Iron Ingot",
+        "Stick",
+        "Iron Ingot",
+        "Iron Ingot",
+    ]:
+        return (Item("Iron Axe", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 3, 4, 6, 7] and recipe_components == [
+        "Stick",
+        "Oak Planks",
+        "Stick",
+        "Oak Planks",
+        "Oak Planks",
+    ]:
+        return (Item("Wood Axe", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 3, 4, 6, 7] and recipe_components == [
+        "Stick",
+        "Stone",
+        "Stick",
+        "Stone",
+        "Stone",
+    ]:
+        return (Item("Stone Axe", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 3, 4, 6, 7] and recipe_components == [
+        "Stick",
+        "Gold Ingot",
+        "Stick",
+        "Gold Ingot",
+        "Gold Ingot",
+    ]:
+        return (Item("Diamond Axe", "Tool", count=1, durability=320), recipe_components)
     else:
         return (None, None)
 
@@ -86,5 +134,7 @@ def smelt(inventory):
     fuel = get_fuel(inventory[1].item.name)
     if inventory[0].item.name == "Raw Iron":
         return Item("Iron Ingot", "Item"), fuel # returns fuel use ex. if fuel = 8 then item duarability * 1/8
+    elif inventory[0].item.name == "Raw Gold":
+        return Item("Gold Ingot", "Item"), fuel
     else:
         return None, None

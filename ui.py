@@ -227,7 +227,9 @@ def manage_all_inventories(
                 result_inventory[0].item = None
         return
     
-def render_health(window, health: int):
+def render_health(window, health: int, inv_view):
+    if inv_view:
+        return
     starting_x = 6 * slot_size
     starting_y = (9 * slot_size)  - heart_size*1.1
     for _ in range(health//2):

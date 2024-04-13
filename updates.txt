@@ -92,3 +92,4 @@ __2dminecraft-V-0.8.0__
     # 1,526 lines of code!
     + health
     + health effects
+    + 6 new tools

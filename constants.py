@@ -33,7 +33,7 @@ world_depth = 64
 
 heart_size = 27
 
-VERSION = "0.8.0.3b"
+VERSION = "0.8.0.4b"
 
 # loading all assets and merging into a single dict
 assets = load_assets("assets\\Blocks", (block_size, block_size))

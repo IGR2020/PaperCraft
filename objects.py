@@ -25,6 +25,18 @@ def get_break_bonus(tool_name, category):
         return -9.5
     elif tool_name == "Diamond Pickaxe" and category == "rock":
         return -9.7
+    elif tool_name == "Gold Pickaxe" and category == "rock":
+        return -9.8
+    elif tool_name == "Wood Axe" and category == "wood":
+        return -1.1
+    elif tool_name == "Stone Axe" and category == "wood":
+        return -1.6
+    elif tool_name == "Iron Axe" and category == "wood":
+        return -2.1
+    elif tool_name == "Diamond Axe" and category == "wood":
+        return -2.6
+    elif tool_name == "Gold Axe" and category == "wood":
+        return -2.8
     else:
         return 0
     
@@ -35,6 +47,12 @@ def get_fuel(fuel_name):
         return 4.5
     if fuel_name == "Coal":
         return 8
+    if fuel_name == "Wood Pickaxe":
+        return 3.5
+    if fuel_name == "Wood Axe":
+        return 3.5
+    if fuel_name == "Wood Shovel":
+        return 1.2
     else:
         return 1
 
