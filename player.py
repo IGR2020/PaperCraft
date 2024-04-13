@@ -23,17 +23,22 @@ class Player(pygame.sprite.Sprite):
         self.held = Slot((200, 200), None, "Slot")
         self.is_sprinting = False
         self.default_speed = 3
+        self.health = 20
 
     def render(self, screen, x_offset, y_offset):
         screen.blit(assets["Player"], (self.rect.x - x_offset, self.rect.y - y_offset))
 
-    def script(self, objects):
+    def script(self, objects, damaged, damage_effect_timer):
         self.y_vel += self.fall_speed
         self.y_vel = min(16, self.y_vel)
         self.rect.y += self.y_vel
         for obj in objects:
             if self.rect.colliderect(obj.rect):
                 if self.y_vel > 0:
+                    if self.y_vel > 6:
+                        self.health -= round(self.y_vel) - 5
+                        damaged = True
+                        damage_effect_timer = time()
                     self.y_vel = 0
                     self.rect.bottom = obj.rect.top
                     self.jump_count = 0
@@ -44,6 +49,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.default_speed = 2
         self.move(objects)
+        return damaged, damage_effect_timer
 
     def move(self, objects):
         self.rect.x += self.x_vel

@@ -1,9 +1,8 @@
 import pygame
 from objects import Item
 from pygame_tools import blit_text
-from constants import block_size, assets
+from constants import block_size, assets, heart_size, slot_size
 from workbench import craft, smelt
-from time import time
 
 # finds available or matching slots for an item
 def find_slot(item_name, inventory, max_stack_count=64, avail_count_needed=1):
@@ -227,6 +226,16 @@ def manage_all_inventories(
                     inventory[slot_index].item = result_inventory[0].item
                 result_inventory[0].item = None
         return
+    
+def render_health(window, health: int):
+    starting_x = 6 * slot_size
+    starting_y = (9 * slot_size)  - heart_size*1.1
+    for _ in range(health//2):
+        window.blit(assets["Full Heart"], (starting_x, starting_y))
+        starting_x += heart_size
+    if health % 2 == 1:
+        window.blit(assets["Half Heart"], (starting_x, starting_y))
+    return
         
         
         

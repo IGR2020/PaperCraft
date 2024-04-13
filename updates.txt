@@ -90,3 +90,5 @@ __2dminecraft-V-0.8.0__
     + auto jumping
     + durability
     # 1,526 lines of code!
+    + health
+    + health effects

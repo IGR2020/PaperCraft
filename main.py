@@ -25,12 +25,14 @@ from ui import (
     find_slot,
     maintain_inventory,
     manage_all_inventories,
+    render_health
 )
 
 from pygame_tools import remove_prefix
 
 
 def loop(func, fps: int):
+
     def loop_func():
         clock = pygame.time.Clock()
         while run:
@@ -377,13 +379,15 @@ def display():
             (target_obj.rect.x - x_offset, target_obj.rect.y - y_offset),
         )
     player.render(window, x_offset, y_offset)
+    if damaged:
+        window.blit(damage_filter, (0, 0))
     if world_type == "Horror":
         filter.fill(pygame.color.Color("Grey"))
         y = player.rect.y + 28 - y_offset
         x = player.rect.x + 14 - x_offset
         x -= 150
         y -= 150
-        filter.blit(assets["Light"], (x, y))
+        darkness_filter.blit(assets["Light"], (x, y))
         window.blit(filter, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
     render_ui(
         window,
@@ -395,6 +399,7 @@ def display():
         inv_view,
         selection,
     )
+    render_health(window, player.health)
     pygame.display.update()
 
 def update_items():
@@ -426,7 +431,6 @@ def update_items():
 
 
 if __name__ == "__main__":
-
     # main menu and getting information
     world_name, world_type = main_menu()
 
@@ -475,6 +479,9 @@ if __name__ == "__main__":
     break_bonus = 0
 
     key_space = 0 # mesures time bettween key presses of the same key used for sprinting
+
+    damaged = True
+    damage_effect_timer = 0
 
     # making functions into loops
     display = loop(display, 60)
@@ -676,7 +683,9 @@ if __name__ == "__main__":
         maintain_inventory(
             player.inventory, player.held, external_inventory, result_inventory
         )
-        player.script([*chunk1, *chunk2])
-
+        damaged, damage_effect_timer = player.script([*chunk1, *chunk2], damaged, damage_effect_timer)
+        if damaged:
+            if time() - damage_effect_timer > 1:
+                damaged = False
     pygame.quit()
     quit()

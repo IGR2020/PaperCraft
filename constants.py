@@ -31,6 +31,8 @@ chunck_size = 64
 world_height = -64
 world_depth = 64
 
+heart_size = 27
+
 VERSION = "0.8.0.3b"
 
 # loading all assets and merging into a single dict
@@ -44,13 +46,22 @@ overlays = load_assets("assets\\Overlay")
 for i in overlays:
     overlays[i].set_colorkey((255, 255, 255))
     assets[i] = overlays[i]
+gui = load_assets("assets\\Gui", (heart_size, heart_size))
+assets.update(gui)
 del other_assets
 del overlays
 del items
+del gui
 
 
 # horror assets
 assets["Light"] = pygame.transform.scale(assets["Light"], (300, 300))
 horror_bg_color = (0, 0, 0)
-filter = pygame.Surface((WIDTH, HEIGHT))
-filter.fill(pygame.color.Color("Grey"))
+darkness_filter = pygame.Surface((WIDTH, HEIGHT))
+darkness_filter.fill(pygame.color.Color("Grey"))
+
+# damage effects
+damage_filter = pygame.Surface((WIDTH, HEIGHT))
+damage_filter.convert_alpha()
+damage_filter.fill((179, 14, 8))
+damage_filter.set_alpha(45)
