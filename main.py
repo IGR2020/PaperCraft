@@ -483,6 +483,8 @@ if __name__ == "__main__":
     damaged = True
     damage_effect_timer = 0
 
+    player.inventory[1].item = Item("Oak Planks", "Block", "plant", 0.001, 128)
+
     # making functions into loops
     display = loop(display, 60)
     update_items = loop(update_items, 20)
@@ -664,14 +666,14 @@ if __name__ == "__main__":
             # saving all data
             save_chunk(prev_closest_chunk, chunk2)
             if isfile(f"worlds\\{world_name}\\{closest_chunk}.pkl"):
+                print("loaded")
+                print(len(chunk1), len(chunk2))
                 chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")
             else:
                 chunk2 = generate_world(
                     closest_chunk * chunck_size,
                     closest_chunk * chunck_size + chunck_size,
                 )
-            if isfile(f"worlds\\{world_name}\\{current_chunk}.pkl"):
-                save_data(chunk1, f"worlds\\{world_name}\\{current_chunk}.pkl")
             swap = True
 
         if mouse_down:

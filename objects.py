@@ -37,6 +37,16 @@ def get_break_bonus(tool_name, category):
         return -2.6
     elif tool_name == "Gold Axe" and category == "wood":
         return -2.8
+    elif tool_name == "Gold Shovel" and category == "soil":
+        return -0.73
+    elif tool_name == "Diamond Shovel" and category == "soil":
+        return -0.70
+    elif tool_name == "Iron Shovel" and category == "soil":
+        return -0.6
+    elif tool_name == "Stone Shovel" and category == "soil":
+        return -0.4
+    elif tool_name == "Wood Shovel" and category == "soil":
+        return -0.3
     else:
         return 0
     

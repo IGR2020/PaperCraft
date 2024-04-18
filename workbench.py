@@ -111,10 +111,10 @@ def craft(external_inventory):
         return (Item("Wood Axe", "Tool", count=1, durability=320), recipe_components)
     elif rci == [1, 3, 4, 6, 7] and recipe_components == [
         "Stick",
-        "Stone",
+        "Cobblestone",
         "Stick",
-        "Stone",
-        "Stone",
+        "Cobblestone",
+        "Cobblestone",
     ]:
         return (Item("Stone Axe", "Tool", count=1, durability=320), recipe_components)
     elif rci == [1, 3, 4, 6, 7] and recipe_components == [
@@ -124,7 +124,37 @@ def craft(external_inventory):
         "Gold Ingot",
         "Gold Ingot",
     ]:
-        return (Item("Diamond Axe", "Tool", count=1, durability=320), recipe_components)
+        return (Item("Gold Axe", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 4, 7] and recipe_components == [
+        "Stick",
+        "Stick",
+        "Gold Ingot",
+    ]:
+        return (Item("Gold Shovel", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 4, 7] and recipe_components == [
+        "Stick",
+        "Stick",
+        "Iron Ingot",
+    ]:
+        return (Item("Iron Shovel", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 4, 7] and recipe_components == [
+        "Stick",
+        "Stick",
+        "Diamond",
+    ]:
+        return (Item("Diamond Shovel", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 4, 7] and recipe_components == [
+        "Stick",
+        "Stick",
+        "Cobblestone",
+    ]:
+        return (Item("Stone Shovel", "Tool", count=1, durability=320), recipe_components)
+    elif rci == [1, 4, 7] and recipe_components == [
+        "Stick",
+        "Stick",
+        "Oak Planks",
+    ]:
+        return (Item("Wood Shovel", "Tool", count=1, durability=320), recipe_components)
     else:
         return (None, None)
 
@@ -136,5 +166,7 @@ def smelt(inventory):
         return Item("Iron Ingot", "Item"), fuel # returns fuel use ex. if fuel = 8 then item duarability * 1/8
     elif inventory[0].item.name == "Raw Gold":
         return Item("Gold Ingot", "Item"), fuel
+    elif inventory[0].item.name == "Cobblestone":
+        return Item("Stone", "Item"), fuel
     else:
         return None, None

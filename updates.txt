@@ -93,3 +93,6 @@ __2dminecraft-V-0.8.0__
     + health
     + health effects
     + 6 new tools
+    + 5 new tools
+    + stone smelting
+    $ tried fixing terrain generation issues.
