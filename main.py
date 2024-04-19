@@ -461,7 +461,9 @@ if __name__ == "__main__":
     x_offset, y_offset = read_pair(f"worlds\\{world_name}\\offsets.txt")
     current_chunk = 0
     closest_chunk = -1
-    swap = False
+    swap = True
+    prev_chunk = current_chunk
+    prev_closest_chunk = closest_chunk
 
     external_inventory = None
     external_inventory_type = None
@@ -656,7 +658,9 @@ if __name__ == "__main__":
 
         # managing chunk generation
         if prev_chunk != current_chunk and not swap:
+            prev_chunk = current_chunk
             # swaping chunks
+            print("Swap")
             chunk1, chunk2 = chunk2, chunk1
             swap = True
         else:
@@ -664,10 +668,9 @@ if __name__ == "__main__":
 
         if prev_closest_chunk != closest_chunk and not swap:
             # saving all data
+            print(prev_closest_chunk, current_chunk)
             save_chunk(prev_closest_chunk, chunk2)
             if isfile(f"worlds\\{world_name}\\{closest_chunk}.pkl"):
-                print("loaded")
-                print(len(chunk1), len(chunk2))
                 chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")
             else:
                 chunk2 = generate_world(

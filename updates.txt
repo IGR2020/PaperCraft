@@ -96,3 +96,4 @@ __2dminecraft-V-0.8.0__
     + 5 new tools
     + stone smelting
     $ tried fixing terrain generation issues.
+    + fixed world gen issues only -1 chunk missing
