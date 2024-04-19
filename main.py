@@ -253,13 +253,40 @@ def add_obj_as_entity(obj):
             )
         )
 
+def get_target_obj():
+    global chunk1, chunk2, player, selection, start_time
+    target_obj = None
+    break_bonus = 0
+    x, y = pygame.mouse.get_pos()
+    x += x_offset
+    y += y_offset
+    for obj in chunk1:
+        if obj.rect.collidepoint((x, y)):
+            target_obj = obj
+            if player.inventory[selection].item is not None:
+                break_bonus = get_break_bonus(player.inventory[selection].item.name, target_obj.category)
+            break
+    else:
+        for obj in chunk2:
+            if obj.rect.collidepoint((x, y)):
+                target_obj = obj
+                if player.inventory[selection].item is not None:
+                    break_bonus = get_break_bonus(player.inventory[selection].item.name, target_obj.category)
+    return target_obj, break_bonus
 
 def delete_block():
-    global target_obj
+    global target_obj, chunk1, chunk2, player, break_bonus, start_time, mouse_down, entities, selection
+    if not mouse_down:
+        return
     if target_obj is None:
+        start_time = time()
+        target_obj, break_bonus = get_target_obj()
+        return
+    if target_obj.name == "Bedrock":
+        target_obj = None
         return
     current_time = time()
-    if not (current_time > start_time + target_obj.break_time + break_bonus and mouse_down):
+    if not (current_time > start_time + target_obj.break_time + break_bonus):
         return
     x, y = pygame.mouse.get_pos()
     x += x_offset
@@ -272,6 +299,11 @@ def delete_block():
     if player.inventory[selection].item is not None:
         player.inventory[selection].item.durability -= 1
     target_obj = None
+    for entity in entities:
+        entity.static = False
+        entity.buffer = 0
+    start_time = time()
+    target_obj, break_bonus = get_target_obj()
 
 
 # activated opon request to place block
@@ -485,8 +517,6 @@ if __name__ == "__main__":
     damaged = True
     damage_effect_timer = 0
 
-    player.inventory[1].item = Item("Oak Planks", "Block", "plant", 0.001, 128)
-
     # making functions into loops
     display = loop(display, 60)
     update_items = loop(update_items, 20)
@@ -535,25 +565,11 @@ if __name__ == "__main__":
                 run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_down = True
                 if not inv_view:
                     if event.button == 1:
+                        mouse_down = True
                         start_time = time()
-                        x, y = pygame.mouse.get_pos()
-                        x += x_offset
-                        y += y_offset
-                        for obj in chunk1:
-                            if obj.rect.collidepoint((x, y)):
-                                target_obj = obj
-                                if player.inventory[selection].item is not None:
-                                    break_bonus = get_break_bonus(player.inventory[selection].item.name, target_obj.category)
-                                break
-                        else:
-                            for obj in chunk2:
-                                if obj.rect.collidepoint((x, y)):
-                                    target_obj = obj
-                                    if player.inventory[selection].item is not None:
-                                        break_bonus = get_break_bonus(player.inventory[selection].item.name, target_obj.category)
+                        target_obj, break_bonus = get_target_obj()
                         delete_block()
                     if event.button == 3:
                         right_click()
@@ -580,9 +596,10 @@ if __name__ == "__main__":
                     )
 
             if event.type == pygame.MOUSEBUTTONUP:
-                mouse_down = False
-                target_obj = None
-                break_bonus = 0
+                if event.button == 1:
+                    mouse_down = False
+                    target_obj = None
+                    break_bonus = 0
 
             if event.type == pygame.KEYDOWN:
 
@@ -601,7 +618,9 @@ if __name__ == "__main__":
                     print("Previous chunk x = ", prev_chunk)
                     print("Current y = ", player.rect.y)
                     print("Closest chunk = ", closest_chunk)
-                    print("Current x = ", player.rect.x // block_size, "\n")
+                    print("Current x = ", player.rect.x // block_size)
+                    for entity in entities:
+                        print(entity.static)
 
                 if event.key == pygame.K_TAB:
                     player.rect.x = 450
@@ -660,7 +679,6 @@ if __name__ == "__main__":
         if prev_chunk != current_chunk and not swap:
             prev_chunk = current_chunk
             # swaping chunks
-            print("Swap")
             chunk1, chunk2 = chunk2, chunk1
             swap = True
         else:
@@ -668,7 +686,6 @@ if __name__ == "__main__":
 
         if prev_closest_chunk != closest_chunk and not swap:
             # saving all data
-            print(prev_closest_chunk, current_chunk)
             save_chunk(prev_closest_chunk, chunk2)
             if isfile(f"worlds\\{world_name}\\{closest_chunk}.pkl"):
                 chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")

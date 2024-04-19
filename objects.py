@@ -182,23 +182,33 @@ class EntityItem:
             self.max_durability = durability
         else:
             self.max_durability = max_durability
+        self.static = False
+        self.prev_height = None
+        self.buffer = 0 # if buffer is 5 the object becomes static
 
 
     def display(self, screen: pygame.Surface, x_offset, y_offset):
         screen.blit(assets[self.name], (self.rect.x - x_offset, self.rect.y - y_offset))
 
     def script(self):
+        if self.static:
+            return
+        if self.prev_height == self.rect.y:
+            self.buffer += 1
+        if self.buffer >= 5:
+            self.static = True
+        self.prev_height = self.rect.y
         self.y_vel += item_fall_speed
         self.rect.y += self.y_vel
 
     def solve_collision(self, obj):
+        if self.static: return
         if self.rect.colliderect(obj.rect):
             if self.y_vel > 0:
                 self.y_vel = 0
                 self.rect.bottom = obj.rect.top
             elif self.y_vel < 0:
                 self.rect.top = obj.rect.bottom
-
 
 class Button:
     def __init__(self, pos, name):
