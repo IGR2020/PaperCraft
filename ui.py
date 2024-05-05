@@ -227,11 +227,10 @@ def manage_all_inventories(
                 result_inventory[0].item = None
         return
     
-def render_health(window, health: int, inv_view):
+def render_health(window, health: int, inv_view, starting_x, window_height):
     if inv_view:
         return
-    starting_x = 6 * slot_size
-    starting_y = (9 * slot_size)  - heart_size*1.1
+    starting_y = window_height-window_height*0.136  - heart_size*1.1
     for _ in range(health//2):
         window.blit(assets["Full Heart"], (starting_x, starting_y))
         starting_x += heart_size

@@ -430,8 +430,9 @@ def display():
         inv_view,
         inv_view,
         selection,
+        scroll_bar_slots
     )
-    render_health(window, player.health, inv_view)
+    render_health(window, player.health, inv_view, player.inventory[0].rect.x, HEIGHT,)
     pygame.display.update()
 
 def update_items():
@@ -516,6 +517,8 @@ if __name__ == "__main__":
 
     damaged = True
     damage_effect_timer = 0
+
+    player.inventory[1].item = Item("Oak Planks", "Block", None, 0.1, 196)
 
     # making functions into loops
     display = loop(display, 60)
@@ -622,18 +625,6 @@ if __name__ == "__main__":
                     for entity in entities:
                         print(entity.static)
 
-                if event.key == pygame.K_TAB:
-                    player.rect.x = 450
-                    player.rect.y = -1500
-                    x_offset = 0
-                    y_offset = -1500
-                    current_chunk = 0
-                    closest_chunk = -1
-                    prev_chunk = 0
-                    prev_closest_chunk = -1
-                    chunk1 = load_data(f"worlds\\{world_name}\\{current_chunk}.pkl")
-                    chunk2 = load_data(f"worlds\\{world_name}\\{closest_chunk}.pkl")
-
                 if event.key == pygame.K_q:
                     x, y = pygame.mouse.get_pos()
                     x += x_offset
@@ -656,6 +647,15 @@ if __name__ == "__main__":
                     if time() - key_space < 0.5:
                         player.is_sprinting = True
                     key_space = time()
+
+            if event.type == pygame.VIDEORESIZE:
+                prev_width = WIDTH
+                WIDTH, HEIGHT = event.dict["size"]
+                for slot_num in scroll_bar_slots:
+                    player.inventory[slot_num].rect.x += (WIDTH-prev_width)/2 
+                    player.inventory[slot_num].rect.y = HEIGHT-HEIGHT*0.136
+                damage_filter = pygame.transform.scale(damage_filter, (WIDTH, HEIGHT))
+                darkness_filter = pygame.transform.scale(darkness_filter, (WIDTH, HEIGHT))
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:

@@ -24,7 +24,7 @@ ore_vein_size = 7
 stack_size = 64
 slot_size = 48
 
-scroll_area = 100
+scroll_area = 150
 
 chunck_size = 32
 
@@ -32,6 +32,8 @@ world_height = -64
 world_depth = 64
 
 heart_size = 27
+
+scroll_bar_slots=[0, 1, 2, 3, 4, 5]
 
 VERSION = "0.8.0.7b"
 
