@@ -1,8 +1,9 @@
 from constants import *
 import pygame as pg
 from os import listdir, makedirs
-from pygame_tools import Button, blit_text
+from pygame_tools import *
 from world import write_pair, write_string, read_string
+from world import load_data
 
 def main_menu():
     world_name = ""
@@ -16,13 +17,21 @@ def main_menu():
     horror = False
     horror_button = Button((220, 50), assets["Horror"])
 
+    chunkViewButton = Button((0, HEIGHT-slot_size), assets["Chunk View"])
+
     world_type = "Normal"
     
     while run:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if chunkViewButton.clicked():
+                    chunkViewButton.image = assets["Chunk View Pressed"]
             if event.type == pg.MOUSEBUTTONUP:
+                chunkViewButton.image = assets["Chunk View"]
+                if chunkViewButton.clicked():
+                    viewChunks()
                 if play_button.clicked() and mode == "Menu":
                     mode = "Create"
                     select = True
@@ -34,6 +43,7 @@ def main_menu():
                     else:
                         world_type = "Normal"
                         horror_button.image = assets["Horror"]
+                
             if event.type == pg.KEYDOWN and select:
                 if event.key == pg.K_RETURN:
                     world_exists = False
@@ -64,6 +74,7 @@ def main_menu():
         if mode == "Menu":
             window.blit(assets["Title"], (186.5, 50))
             play_button.display(window)
+            chunkViewButton.display(window)
         elif mode == "Create":
             horror_button.display(window)
             blit_text(window, "Enter World Name", (322, 280), (255, 255, 255), 25)
@@ -95,3 +106,44 @@ def version_warning():
         pg.display.update()
     pg.quit()
     quit()
+
+def viewChunks():
+    run = True
+    renderChunk = False
+    x_offset, y_offset = 0, 0
+    chunks = []
+    caption = Text("Enter World Name", WIDTH/2, HEIGHT/2 - 80, (255, 255, 255), 40, "ArialBlack", center=True)
+    enterName = TextBox(assets["Text Box Clean"], assets["Text Box Clean"], 4, WIDTH/2, HEIGHT/2, (0, 0, 0), 30, "ArialBlack", center=True)
+    while run:
+        for event in pg.event.get():
+            enterName.update_text(event)
+            if event.type == pg.QUIT:
+                pg.quit()
+                quit()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_BACKSPACE and not enterName.selected:
+                    return
+                
+                if event.key == pg.K_RETURN:
+                    try:
+                        for file in listdir(f"worlds/{enterName.text}"):
+                            if file[0] in "-1234567890":
+                                chunks.append(load_data(f"worlds/{enterName.text}/{file}"))
+                        renderChunk = True
+                    except:
+                        continue
+        enterName.select()
+        if renderChunk:
+            window.fill((150, 150, 255))
+            rel_x, rel_y = pg.mouse.get_rel()
+            if True in pg.mouse.get_pressed():
+                x_offset -= rel_x
+                y_offset -= rel_y
+            for chunk in chunks:
+                for block in chunk:
+                    block.render(window, x_offset, y_offset)
+        else:
+            window.fill((30, 30, 30))
+            enterName.display(window)
+            caption.display(window)
+        pg.display.update()

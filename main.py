@@ -414,13 +414,13 @@ def display():
     if damaged:
         window.blit(damage_filter, (0, 0))
     if world_type == "Horror":
-        filter.fill(pygame.color.Color("Grey"))
+        darkness_filter.fill(pygame.color.Color("Grey"))
         y = player.rect.y + 28 - y_offset
         x = player.rect.x + 14 - x_offset
         x -= 150
         y -= 150
         darkness_filter.blit(assets["Light"], (x, y))
-        window.blit(filter, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+        window.blit(darkness_filter, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
     render_ui(
         window,
         player.inventory,
@@ -517,8 +517,6 @@ if __name__ == "__main__":
 
     damaged = True
     damage_effect_timer = 0
-
-    player.inventory[1].item = Item("Oak Planks", "Block", None, 0.1, 196)
 
     # making functions into loops
     display = loop(display, 60)

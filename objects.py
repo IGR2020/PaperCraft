@@ -4,17 +4,10 @@ from constants import slot_size, assets, item_fall_speed
 
 
 def get_break_time(category):
-    if category == "wood":
-        return 3
-    elif category == "soil":
-        return 0.75
-    elif category == "rock":
-        return 10
-    elif category == "plant":
-        return 0.3
-    else:
+    try:
+        return {"wood": 3, "soil": 0.75, "rock": 10, "plant": 0.3}[category]
+    except:
         return 0
-
 
 def get_break_bonus(tool_name, category):
     if tool_name == "Wood Pickaxe" and category == "rock":
@@ -66,6 +59,10 @@ def get_fuel(fuel_name):
     else:
         return 1
 
+class Chunk:
+    def __init__(self, id, blocks) -> None:
+        self.id = id
+        self.blocks = blocks
 
 class Object:
     def __init__(self, x, y, width, height, name):
